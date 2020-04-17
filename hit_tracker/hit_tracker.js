@@ -746,19 +746,35 @@ async function requesterOverview () {
       const hit = cursor.value
       const requester_id = hit.requester_id
 
-      if (hit.state.match(/Submitted|Pending|Approved|Paid/)) {
-        if (cursorAccumulator[requester_id]) {
-          cursorAccumulator[requester_id].count += 1
-          cursorAccumulator[requester_id].value += hit.reward.amount_in_dollars
-        } else {
-          cursorAccumulator[requester_id] = {
-            id: requester_id,
-            name: hit.requester_name,
-            count: 1,
-            value: hit.reward.amount_in_dollars
-          }
-        }
+      if(!cursorAccumulator[requester_id] ) {
+        cursorAccumulator[requester_id] = {
+                    id: requester_id,
+                    name: hit.requester_name,
+                    count: 0,
+                    rejected: 0,
+                    pending: 0,
+                    approved: 0,
+                    paid: 0,
+                    value: hit.reward.amount_in_dollars
+                  }
       }
+
+      if (hit.state.match(/Submitted|Pending|Approved|Paid|Rejected/)) {
+        var isPending = (hit.state.match(/Pending|Submitted/)) ? 1 : 0
+        var isApproved = (hit.state.match(/Approved/)) ? 1 : 0
+        var isPaid = (hit.state.match(/Paid/)) ? 1 : 0
+        var isRejected = (hit.state.match(/Rejected/)) ? 1 : 0
+
+        cursorAccumulator[requester_id].count += 1
+        cursorAccumulator[requester_id].value += hit.reward.amount_in_dollars
+
+        if(isPending) {cursorAccumulator[requester_id].pending += 1}
+        if(isApproved) {cursorAccumulator[requester_id].approved += 1}
+        if(isPaid) {cursorAccumulator[requester_id].paid += 1}
+        if(isRejected) {cursorAccumulator[requester_id].rejected += 1 }
+
+      }
+      else {console.log("found " + hit.state + " for " + requester_id)}
 
       return cursor.continue()
     } else {
@@ -798,6 +814,22 @@ async function requesterOverview () {
         count.textContent = req.count
         tr.appendChild(count)
 
+        const pending = document.createElement(`td`)
+        pending.textContent = req.pending
+        tr.appendChild(pending)
+
+        const rejections = document.createElement(`td`)
+        rejections.textContent = req.rejected
+        tr.appendChild(rejections)
+
+        const approved = document.createElement(`td`)
+        approved.textContent = req.approved
+        tr.appendChild(approved)
+
+        const paid = document.createElement(`td`)
+        paid.textContent = req.paid
+        tr.appendChild(paid)
+
         const value = document.createElement(`td`)
         value.textContent = toMoneyString(req.value)
         tr.appendChild(value)
@@ -818,6 +850,22 @@ async function requesterOverview () {
     const count = document.createElement(`td`)
     count.textContent = `HITs`
     tr.appendChild(count)
+
+    const pending = document.createElement(`td`)
+    pending.textContent = `Pending`
+    tr.appendChild(pending)
+
+    const rejections = document.createElement(`td`)
+    rejections.textContent = `Rejected`
+    tr.appendChild(rejections)
+
+    const approved = document.createElement(`td`)
+    approved.textContent = `Approved`
+    tr.appendChild(approved)
+
+    const paid = document.createElement(`td`)
+    paid.textContent = `Paid`
+    tr.appendChild(paid)
 
     const value = document.createElement(`td`)
     value.textContent = `Reward`
