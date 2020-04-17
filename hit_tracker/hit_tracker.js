@@ -1039,7 +1039,7 @@ async function search () {
 
   let count = 0
 
-  const results = document.getElementById(`history-results`)
+  const results = document.getElementById(`search-results`)
 
   while (results.firstChild) {
     results.removeChild(results.firstChild)
@@ -1152,6 +1152,8 @@ async function search () {
 
     results.appendChild(th)
     results.appendChild(fragment)
+
+    $('#tracker_tabs a[href="#searcht"]').tab("show")
 
     return searchEnd()
   }
