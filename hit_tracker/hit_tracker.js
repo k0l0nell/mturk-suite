@@ -792,21 +792,22 @@ async function requesterOverview () {
         const requester = document.createElement(`td`)
         tr.append(requester)
 
-        const requesterView = document.createElement(`button`)
-        requesterView.className = `btn btn-sm btn-primary mr-1`
-        requesterView.textContent = `View`
-        requesterView.addEventListener(`click`, async (event) => {
-          document.getElementById(`view`).value = ``
-          document.getElementById(`matching`).value = req.id
-          document.getElementById(`date-from`).value = ``
-          document.getElementById(`date-to`).value = ``
-          search()
-        })
+        const requesterView = document.createElement(`a`)
+        requesterView.target = `_blank`
+        requesterView.className = `btn btn-sm btn-outline-warning orange mr-1`
+        requesterView.textContent = `MTurk`
+        requesterView.href = `https://worker.mturk.com/requesters/${req.id}/projects`
         requester.appendChild(requesterView)
 
         const requesterLink = document.createElement(`a`)
-        requesterLink.href = `https://worker.mturk.com/requesters/${req.id}/projects`
-        requesterLink.target = `_blank`
+        requesterLink.addEventListener(`click`, async (event) => {
+                  document.getElementById(`view`).value = ``
+                  document.getElementById(`matching`).value = req.id
+                  document.getElementById(`date-from`).value = ``
+                  document.getElementById(`date-to`).value = ``
+                  search()
+                })
+        requesterLink.style=`cursor:pointer`
         requesterLink.textContent = req.name
         requester.appendChild(requesterLink)
 
@@ -841,7 +842,7 @@ async function requesterOverview () {
 
   transaction.oncomplete = (event) => {
     const tr = document.createElement(`tr`)
-    tr.className = `bg-primary text-white`
+    tr.className = `bg-secondary text-white`
 
     const requester = document.createElement(`td`)
     requester.textContent = `Requester`
@@ -909,7 +910,7 @@ async function dailyOverview () {
 
   transaction.oncomplete = (event) => {
     const th = document.createElement(`tr`)
-    th.className = `bg-primary text-white`
+    th.className = `bg-secondary text-white`
 
     const date = document.createElement(`td`)
     date.textContent = `Date`
@@ -954,6 +955,14 @@ async function dailyOverview () {
       const formattedDate = [day.date.slice(0, 4), day.date.slice(4, 6), day.date.slice(6, 8)].join(`-`)
 
       const date = document.createElement(`td`)
+      date.addEventListener(`click`, async (event) => {
+                   document.getElementById(`view`).value = ``
+                   document.getElementById(`matching`).value = ``
+                   document.getElementById(`date-from`).value = formattedDate
+                   document.getElementById(`date-to`).value = formattedDate
+                   search()
+                 })
+      date.style = `cursor:pointer`
       date.textContent = formattedDate
       tr.appendChild(date)
 
@@ -984,20 +993,8 @@ async function dailyOverview () {
       const actions = document.createElement(`span`)
       date.prepend(actions)
 
-      const viewThisDay = document.createElement(`button`)
-      viewThisDay.className = `btn btn-sm btn-primary mr-1`
-      viewThisDay.textContent = `View`
-      viewThisDay.addEventListener(`click`, async (event) => {
-        document.getElementById(`view`).value = ``
-        document.getElementById(`matching`).value = ``
-        document.getElementById(`date-from`).value = formattedDate
-        document.getElementById(`date-to`).value = formattedDate
-        search()
-      })
-      actions.appendChild(viewThisDay)
-
       const syncThisDay = document.createElement(`button`)
-      syncThisDay.className = `btn btn-sm btn-primary mr-1`
+      syncThisDay.className = `btn btn-sm btn-outline-danger mr-1`
       syncThisDay.textContent = `Sync`
       syncThisDay.addEventListener(`click`, async (event) => {
         await syncDay(day.date)
@@ -1101,7 +1098,7 @@ async function search () {
         const viewSource = document.createElement(`a`)
         viewSource.href = value.source
         viewSource.target = `_blank`
-        viewSource.className = `btn btn-sm btn-primary mr-1`
+        viewSource.className = `btn btn-sm btn-secondary mr-1`
         viewSource.textContent = `Src`
         title.prepend(viewSource)
 
@@ -1129,7 +1126,7 @@ async function search () {
 
   transaction.oncomplete = (event) => {
     const th = document.createElement(`tr`)
-    th.className = `bg-primary text-white`
+    th.className = `bg-secondary text-white`
 
     const date_accepted = document.createElement(`td`)
     date_accepted.textContent = `Date`
