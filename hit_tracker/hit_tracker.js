@@ -61,23 +61,36 @@ function todaysOverviewData () {
             hits.pending.value += reward
           }
 
+          var isPending = (state.match(/Pending/)) ? 1 : 0
+          var isApproved = (state.match(/Approved/)) ? 1 : 0
+          var isPaid = (state.match(/Paid/)) ? 1 : 0
+
           if (!reqs[requesterId]) {
+
             reqs[requesterId] = {
               id: requesterId,
               name: hit.requester_name,
               count: 1,
+              rejected: 0,
+              pending: isPending,
+              approved: isApproved,
+              paid: isPaid,
               value: reward
             }
           } else {
-            reqs[requesterId].count ++
+            reqs[requesterId].count++
+            if(isPending) {reqs[requesterId].pending++}
+            if(isApproved) {reqs[requesterId].approved++}
+            if(isPaid) {reqs[requesterId].paid++}
             reqs[requesterId].value += reward
           }
         } else if (state.match(/Returned/)) {
           hits.returned.count ++
           hits.returned.value += reward
         } else if (state.match(/Rejected/)) {
-          hits.rejected.count ++
-          hits.rejected.value += reward
+            hits.rejected.count++
+            reqs[requesterId].rejected++
+            hits.rejected.value += reward
         }
 
         hits.assigned.count ++
@@ -141,6 +154,22 @@ function todaysOverviewDisplay () {
     const count = document.createElement(`td`)
     count.textContent = req.count
     row.appendChild(count)
+
+    const pending = document.createElement(`td`)
+    pending.textContent = req.pending
+    row.appendChild(pending)
+
+    const rejections = document.createElement(`td`)
+    rejections.textContent = req.rejected
+    row.appendChild(rejections)
+
+    const approved = document.createElement(`td`)
+    approved.textContent = req.approved
+    row.appendChild(approved)
+
+    const paid = document.createElement(`td`)
+    paid.textContent = req.paid
+    row.appendChild(paid)
 
     const value = document.createElement(`td`)
     value.textContent = toMoneyString(req.value)
