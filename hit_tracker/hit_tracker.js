@@ -717,17 +717,22 @@ document.getElementById(`sync-last-45-days`).addEventListener(`click`, async (e)
   })
 })
 
-document.getElementById(`requester-overview`).addEventListener(`click`, requesterOverview)
-document.getElementById(`daily-overview`).addEventListener(`click`, dailyOverview)
+//document.getElementById(`requester-overview`).addEventListener(`click`, requesterOverview)
+$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+  if(e.target.href.indexOf('requester-summary') >=0 ){ requesterOverview(`requester-results`)}
+  if(e.target.href.indexOf('daily-summary') >=0 ){ dailyOverview(`daily-results`)}
+})
+
+//document.getElementById(`daily-overview`).addEventListener(`click`, dailyOverview)
 document.getElementById(`search`).addEventListener(`click`, search)
 
-async function requesterOverview () {
+async function requesterOverview (targetContainer) {
   statusStart({
     header: `Requester Overview`,
     message: `Starting`
   })
 
-  const results = document.getElementById(`history-results`)
+  const results = document.getElementById(targetContainer)
   const dateTo = document.getElementById(`date-to`).value
   const dateFrom = document.getElementById(`date-from`).value
 
@@ -878,10 +883,10 @@ async function requesterOverview () {
   }
 }
 
-async function dailyOverview () {
+async function dailyOverview (targetContainer) {
   searchStart()
 
-  const results = document.getElementById(`history-results`)
+  const results = document.getElementById(targetContainer)
   const dateTo = document.getElementById(`date-to`).value
   const dateFrom = document.getElementById(`date-from`).value
 
