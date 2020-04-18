@@ -34,6 +34,11 @@ chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => 
     }
 });
 
+  $( function() {
+    $( "#watchers" ).sortable();
+    $( "#watchers" ).disableSelection();
+  } );
+
 const storage = new Object();
 
 (async () => {
