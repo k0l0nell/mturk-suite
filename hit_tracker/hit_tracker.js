@@ -146,11 +146,26 @@ function todaysOverviewDisplay () {
     const requester = document.createElement(`td`)
     row.append(requester)
 
+    const requesterView = document.createElement(`a`)
+    requesterView.target = `_blank`
+    requesterView.className = `btn btn-sm btn-outline-warning orange mr-1`
+    requesterView.textContent = `MTurk`
+    requesterView.href = `https://worker.mturk.com/requesters/${req.id}/projects`
+    requester.appendChild(requesterView)
+
     const requesterLink = document.createElement(`a`)
-    requesterLink.href = `https://worker.mturk.com/requesters/${req.id}/projects`
-    requesterLink.target = `_blank`
-    requesterLink.textContent = req.name
-    requester.appendChild(requesterLink)
+    requesterLink.addEventListener(`click`, async (event) => {
+        document.getElementById(`view`).value = ``
+        document.getElementById(`matching`).value = req.id
+        document.getElementById(`date-from`).value = ``
+        document.getElementById(`date-to`).value = ``
+        search()
+     })
+     requesterLink.style=`cursor:pointer`
+     requesterLink.textContent = req.name
+     requester.appendChild(requesterLink)
+
+
 
     const count = document.createElement(`td`)
     count.textContent = req.count
@@ -718,13 +733,10 @@ document.getElementById(`sync-last-45-days`).addEventListener(`click`, async (e)
   })
 })
 
-//document.getElementById(`requester-overview`).addEventListener(`click`, requesterOverview)
 $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
   if(e.target.href.indexOf('requester-summary') >=0 ){ requesterOverview(`requester-results`)}
   if(e.target.href.indexOf('daily-summary') >=0 ){ dailyOverview(`daily-results`)}
 })
-
-//document.getElementById(`daily-overview`).addEventListener(`click`, dailyOverview)
 document.getElementById(`search`).addEventListener(`click`, search)
 
 async function requesterOverview (targetContainer) {
