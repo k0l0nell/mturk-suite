@@ -90,6 +90,7 @@ function todaysOverviewData () {
         } else if (state.match(/Rejected/)) {
             hits.rejected.count++
             reqs[requesterId].rejected++
+            reqs[requesterId].count++
             hits.rejected.value += reward
         }
 
@@ -760,7 +761,7 @@ async function requesterOverview (targetContainer) {
                     pending: 0,
                     approved: 0,
                     paid: 0,
-                    value: hit.reward.amount_in_dollars
+                    value: 0
                   }
       }
 
@@ -771,7 +772,7 @@ async function requesterOverview (targetContainer) {
         var isRejected = (hit.state.match(/Rejected/)) ? 1 : 0
 
         cursorAccumulator[requester_id].count += 1
-        cursorAccumulator[requester_id].value += hit.reward.amount_in_dollars
+        if (!isRejected) {cursorAccumulator[requester_id].value += hit.reward.amount_in_dollars}
 
         if(isPending) {cursorAccumulator[requester_id].pending += 1}
         if(isApproved) {cursorAccumulator[requester_id].approved += 1}
