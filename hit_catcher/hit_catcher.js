@@ -37,12 +37,15 @@ chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => 
   $( function() {
     $( "#watchers" ).sortable();
     $( "#watchers" ).disableSelection();
+
+    $("#watchersgroups").sortable();
+    $("#watchersgroups" ).disableSelection();
   } );
 
 const storage = new Object();
 
 (async () => {
-    const items = await new Promise((resolve) => chrome.storage.local.get([`hitCatcher`, `order`, `watchers`, `hitCatcherWatchers`], resolve));
+    const items = await new Promise((resolve) => chrome.storage.local.get([`hitCatcher`, `order`, `watchers`, `hitCatcherWatchers`,`watcherGroups`], resolve));
 
     ((object, test) => {
         if (object !== undefined) {
@@ -68,6 +71,27 @@ const storage = new Object();
             }
         }
     })(items.hitCatcherWatchers);
+
+    //reload groups from storage
+    ((object) => {
+
+        const defaultGroup = { id: `default`, name: `Default`, members: [] , order: 0};
+
+        storage.watcherGroups = object instanceof Object ? object : new Object();
+
+        //if nothing is stored then add the default group
+        if(Object.keys(storage.watcherGroups).length == 0) {storage.watcherGroups[defaultGroup.id] = defaultGroup }
+
+        Object.values(storage.watcherGroups).sort(sortWatcherGroups).forEach((group) => {
+            groupAddDraw(group)
+        })
+
+        //todo: Draw members of said groups
+
+        chrome.storage.local.set({
+                watcherGroups: storage.watcherGroups
+        });
+    })(items.watcherGroups);
 
     ((object) => {
         storage.hitCatcher = {
@@ -127,6 +151,15 @@ const storage = new Object();
     })(items.watchers);
 })();
 
+function sortWatcherGroups(groupa, groupb) {
+    if( groupa instanceof Object && groupb instanceof Object) {
+        return groupa.order - groupb.order
+    }
+    else {
+        return 0
+        }
+}
+
 function addGroup() {
     bootbox.prompt({
             title: `Define Group Name`,
@@ -143,7 +176,8 @@ function addGroup() {
                     const group = {
                         id: result.replace(/[^a-z0-9]/gmi, " ").replace(/\s+/g, " ").replace(/ /g,'').toLowerCase(),
                         name: result,
-                        members: []
+                        members: [],
+                        order: $('#watchersgroups').children().length
                     };
 
                     groupAdd(group);
@@ -153,21 +187,45 @@ function addGroup() {
 }
 
 function groupAdd(group) {
-    groupAddDraw(group)
-
+    if(!Object.keys(storage.watcherGroups).includes(group.id))
+    {
+        storage.watcherGroups[group.id] = group;
+        groupAddDraw(group)
+        saveWatcherGroups();
+    }
 }
+
+function addWatchertoGroup(watcher,groupid) {
+    if(watcher instanceof Object) {
+        var group = storage.watcherGroups[groupid] instanceof Object ? storage.watcherGroups[groupid] : storage.watcherGroups[`default`]
+        group.members = group.members.push(watcher.id)
+    }
+    saveWatcherGroups();
+}
+
 
 function groupAddDraw(group) {
     var watchergroup_template = document.getElementById("group_template").innerHTML;
     var watchergroup_rendered = Mustache.render(watchergroup_template,group)
 
     $('#watchersgroups').append(watchergroup_rendered)
+
+    $(`#${group.id}plus`).click((event) => {
+        addWatcher(group.id)
+    });
+
+    $(`#${group.id}remove`).click((event) => {
+            delete storage.watcherGroups[group.id];
+            saveWatcherGroups;
+        });
+
 }
 
 function saveAll() {
     saveOrder();
     saveWatchers();
     saveHitCatcher();
+    saveWatcherGroups();
 }
 
 function saveOrder() {
@@ -199,6 +257,13 @@ function saveWatchers() {
         watchers: filtered
     });
 }
+function saveWatcherGroups() {
+
+    chrome.storage.local.set({
+        watcherGroups: storage.watcherGroups
+    });
+}
+
 
 function saveHitCatcher() {
     storage.hitCatcher.speed = Number(document.getElementById(`speed`).value);
@@ -211,6 +276,10 @@ function saveHitCatcher() {
 }
 
 function addWatcher() {
+    addWatcher('default');
+}
+
+function addWatcher(groupid) {
     bootbox.prompt({
         title: `Add watcher by Groupd Id, Preview URL or Accept URL`,
         buttons: {
@@ -230,6 +299,7 @@ function addWatcher() {
                     sound: true
                 };
 
+                addWatchertoGroup(watcher,groupid);
                 watcherAdd(watcher);
             }
         }

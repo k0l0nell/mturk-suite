@@ -56,9 +56,7 @@
     </div>
 
     <div id="watchersgroups" class="row ml-1 mr-1">
-        <!--div id="watchersgroup-default" class="col-sm-12  border border-primary mb-1">
-            >> default <<
-        </div-->
+
     </div>
 
     <!-- Watcher Settings -->
@@ -234,13 +232,15 @@
 </script>
 <script id="group_template" type="x-tmpl-mustache">
     <div id="watchersgroup-{{id}}" class="card mb-1 w-100">
-        <div class="card-header">
-            &gt;&gt; {{name}} &lt;&lt;
+        <h6 class="card-header">
+            <span class="glyphicon glyphicon-chevron-right text-muted align-center"></span>
+            {{name}}
             <div class="float-right">
+                <span id="{{id}}plus" class="glyphicon glyphicon-plus text-success align-center"></span>
                 <span id="{{id}}pause" class="glyphicon glyphicon-pause text-muted align-center"></span>
                 <span id="{{id}}remove" class="glyphicon glyphicon-remove text-danger align-center"></span>
             </div>
-        </div>
+        </h6>
     </div>
 </script>
 
