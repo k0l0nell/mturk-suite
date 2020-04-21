@@ -13,6 +13,7 @@
     <script src="/bootstrap-4.4/js/bootstrap.min.js"></script>
     <script src="/bootstrap-4.4/js/bootbox.all.min.js"></script>
     <script src="/bootstrap-4.4/js/jquery-ui.js"></script>
+    <script src="/bootstrap-4.4/js/mustache.min.js"></script>
 
     <script src="/js/theme.js"></script>
 </head>
@@ -35,6 +36,7 @@
 
                     </div>
                     <div class="input-group-append">
+                        <button id="add-group" type="button" class="btn btn-sm btn-outline-success">Add Group</button>
                         <button id="add-watcher" type="button" class="btn btn-sm btn-outline-success">Add Watcher</button>
                         <button type="button" class="btn btn-outline-success dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <span class="sr-only">tdrop</span>
@@ -49,7 +51,15 @@
 
 
     <!-- Watchers -->
-    <div id="watchers" class="row"></div>
+    <div id="watchers" class="row mb-1">
+
+    </div>
+
+    <div id="watchersgroups" class="row ml-1 mr-1">
+        <!--div id="watchersgroup-default" class="col-sm-12  border border-primary mb-1">
+            >> default <<
+        </div-->
+    </div>
 
     <!-- Watcher Settings -->
     <div id="watcher-settings-modal" class="modal" tabindex="-1" role="dialog">
@@ -185,6 +195,34 @@
 
 
 </body>
+
+<!-- Template for Watcher-->
+<script id="watcher_template" type="x-tmpl-mustache">
+<div id="{{watcherid}}" class="col-sm-4 col-md-3 col-lg-2 w-20">
+            <div class="card watcher border-warning w-20">
+                <div class="card-header">
+                    <span class="text-bold pl-1 name">{{watcherid}}</span>
+                    <div class="float-right pt-2">
+                        <span id="{{watcherid}}settings" class="glyphicon glyphicon-cog text-muted align-top"></span>
+                        <span id="{{watcherid}}remove" class="glyphicon glyphicon-remove text-danger align-top"></span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="stats" style="font-size: 10px;">Caught: {{watchercaught}}; Searched: {{watchersearched}}; PRE: {{watcherpre}};</div>
+                    <span class="adv-stats"></span>
+                </div>
+                <div class="card-footer p-0 pb-1 pl-1">
+                    <button name="{{watcherid}}" id="{{watcherid}}catch" class="catch btn btn-xxs {{catchon}} mr-1">Catch</button>
+                    <button name="{{watcherid}}" id="{{watcherid}}sound" class="sound btn btn-xxs {{soundon}}">Sound</button>
+                </div>
+            </div>
+        </div>
+</script>
+<script id="group_template" type="x-tmpl-mustache">
+    <div id="watchersgroup-{{id}}" class="col-sm-12  no-border border-primary mb-1">
+            >> {{name}} <<
+    </div>
+</script>
 
 <script src="hit_catcher.js"></script>
 

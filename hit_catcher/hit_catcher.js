@@ -127,6 +127,43 @@ const storage = new Object();
     })(items.watchers);
 })();
 
+function addGroup() {
+    bootbox.prompt({
+            title: `Define Group Name`,
+            buttons: {
+                confirm: {
+                    className: `btn-sm btn-success`
+                },
+                cancel: {
+                    className: `btn-sm btn-danger`
+                }
+            },
+            callback (result) {
+                if (result) {
+                    const group = {
+                        id: result.replace(/[^a-z0-9]/gmi, " ").replace(/\s+/g, " ").replace(/ /g,'').toLowerCase(),
+                        name: result,
+                        members: []
+                    };
+
+                    groupAdd(group);
+                }
+            }
+        });
+}
+
+function groupAdd(group) {
+    groupAddDraw(group)
+
+}
+
+function groupAddDraw(group) {
+    var watchergroup_template = document.getElementById("group_template").innerHTML;
+    var watchergroup_rendered = Mustache.render(watchergroup_template,group)
+
+    $('#watchersgroups').append(watchergroup_rendered)
+}
+
 function saveAll() {
     saveOrder();
     saveWatchers();
@@ -134,6 +171,7 @@ function saveAll() {
 }
 
 function saveOrder() {
+    //"#watchers"
     storage.order = [...document.getElementById(`watchers`).children].map((element) => element.id);
 
     chrome.storage.local.set({
@@ -218,105 +256,37 @@ function watcherDraw(watcher) {
         return;
     }
 
-    const container = document.createElement(`div`);
-    container.id = watcher.id;
-    container.className = `ol-sm-4 col-md-3 col-lg-2`;
+    var watcher_data = {
+        watcherid: watcher.name.length > 0 ? watcher.name : watcher.project instanceof Object && typeof watcher.project.requester_name === `string` ? watcher.project.requester_name : watcher.id,
+        watchercaught: 0,
+        watchersearched: 0,
+        watcherpre: 0,
+        soundon: (watcher.sound === true) ? 'btn-success' : 'btn-outline-success',
+        catchon: (catcher.ids.includes(watcher.id)) ? 'btn-danger' : 'btn-outline-danger'
+    };
 
-    const card = document.createElement(`div`);
-    card.className = `watcher card card-inverse card-hit`;
-    container.appendChild(card);
+    var watcher_template = document.getElementById("watcher_template").innerHTML;
+    var watcher_rendered = Mustache.render(watcher_template,watcher_data)
 
-    const cardHeader = document.createElement(`div`);
-    cardHeader.className = `card-header`;
-    cardHeader.style = `word-wrap: break-word;`;
-    card.appendChild(cardHeader);
+    $('#watchers').append(watcher_rendered)
 
-    const headerRight = document.createElement(`div`);
-    headerRight.className = `float-right bg-primary text-white`;
-    headerRight.style = `position: relative; left: 3px;`;
-    cardHeader.appendChild(headerRight);
-
-    const moveRight = document.createElement(`span`);
-    moveRight.className = `move-right glyphicon glyphicon-menu-right small`;
-    moveRight.addEventListener(`click`, (event) => {
-        watcherMoveRight(watcher); 
+    $(`#${watcher.id}settings`).click( (event) => {
+        watcherSettingsShow(watcher);
     });
-    headerRight.appendChild(moveRight);
 
-    const headerIcons = document.createElement(`div`);
-    headerIcons.className = `float-right`;
-    cardHeader.appendChild(headerIcons);
-
-    const settingsShow = document.createElement(`span`);
-    settingsShow.className = `glyphicon glyphicon-cog text-muted align-top`;
-    settingsShow.addEventListener(`click`, (event) => {
-        watcherSettingsShow(watcher); 
+    $(`#${watcher.id}remove`).click( (event) => {
+       watcherRemove(watcher);
     });
-    headerIcons.appendChild(settingsShow);
 
-    const remove = document.createElement(`span`);
-    remove.className = `glyphicon glyphicon-remove text-danger align-top`;
-    remove.addEventListener(`click`, (event) => {
-        watcherRemove(watcher); 
-    });
-    headerIcons.appendChild(remove);
-
-    const headerLeft = document.createElement(`div`);
-    headerLeft.className = `float-left bg-primary text-white`;
-    headerLeft.style = `position: relative; left: -3px;`;
-    cardHeader.appendChild(headerLeft);
-
-    const moveLeft = document.createElement(`span`);
-    moveLeft.className = `move-left glyphicon glyphicon-menu-left small`;
-    moveLeft.addEventListener(`click`, (event) => {
-        watcherMoveLeft(watcher); 
-    });
-    headerLeft.appendChild(moveLeft);
-
-    const name = document.createElement(`b`);
-    name.className = `name`;
-    name.textContent = watcher.name.length > 0 ? watcher.name : watcher.project instanceof Object && typeof watcher.project.requester_name === `string` ? watcher.project.requester_name : watcher.id;
-    cardHeader.appendChild(name);
-
-    const cardBlock = document.createElement(`div`);
-    cardBlock.className = `card-block border border-top-0 border-primary`;
-    card.appendChild(cardBlock);
-
-    const cardText = document.createElement(`div`);
-    cardText.className = `card-text`;
-    cardBlock.appendChild(cardText);
-
-    const div = document.createElement(`div`);
-    cardText.appendChild(div);
-
-    const stats = document.createElement(`div`);
-    stats.className = `stats`;
-    stats.textContent = `Caught: 0; Searched: 0; PRE: 0;`;
-    stats.style = `font-size: 10px;`
-    div.appendChild(stats);
-
-    const catchToggle = document.createElement(`button`);
-    catchToggle.className = `catch btn btn-xxs btn-default mr-1`;
-    catchToggle.textContent = `Catch`;
-    catchToggle.addEventListener(`click`, (event) => {
-        watcherCatchToggle(watcher);
-    });
-    div.appendChild(catchToggle);
-
-    const soundToggle = document.createElement(`button`);
-    soundToggle.className = `sound btn btn-xxs ${watcher.sound === true ? `btn-success` : `btn-default`}`;
-    soundToggle.textContent = `Sound`;
-    soundToggle.addEventListener(`click`, (event) => {
+    $(`#${watcher.id}sound`).click( (event) => {
         watcherSoundToggle(watcher);
     });
-    div.appendChild(soundToggle);
 
-    const advancedStats = document.createElement(`span`);
-    advancedStats.className = `adv-stats`;
-    advancedStats.style = `font-size: 10px; position: absolute; bottom: 1px; right: 2px;`;
-    div.appendChild(advancedStats);
+    $(`#${watcher.id}catch`).click( (event) => {
+        watcherCatchToggle(watcher);
+    });
 
-    document.getElementById(`watchers`).appendChild(container);
+
 }
 
 function watcherRemove(watcher) {
@@ -365,7 +335,9 @@ function watcherCaught(watcher) {
 
 function watcherNotQualified(watcher) {
     const element = document.getElementById(watcher.id).getElementsByClassName(`watcher`)[0];
-    element.className = element.className.replace(`card-inverse`, `card-warning`);
+    element.className = element.className.replace(`border-warning`, `border-danger`);
+
+    watcherCatchToggle(watcher)
 
     textToSpeech(`You are not qualified to accept this HIT... watcher stopped.`);
 }
@@ -402,28 +374,29 @@ function watcherCatchToggle(watcher) {
     const className = element.className;
 
     if (ids.includes(id) === false) {
-        element.className = className.replace(`btn-default`, `btn-success`);
+        element.className = className.replace(`btn-outline-danger`, `btn-danger`);
 
         ids.push(id);
         catcherRun(id);
     }
     else {
-        element.className = className.replace(`btn-success`, `btn-default`);
+        element.className = className.replace(`btn-danger`, `btn-outline-danger`);
 
         ids.splice(ids.indexOf(id), 1);
     }
 }
 
+
 function watcherSoundToggle(watcher) {
     watcher.sound = watcher.sound === true ? false : true;
     saveWatchers();
 
-    const element = document.getElementById(watcher.id).getElementsByClassName(`sound`)[0];
+    const element = document.getElementById(watcher.id + `sound`);
 
     if (watcher.sound === true) {
-        element.className = element.className.replace(`btn-default`, `btn-success`);
+        element.className = element.className.replace(`btn-outline-success`, `btn-success`);
     } else {
-        element.className = element.className.replace(`btn-success`, `btn-default`);
+        element.className = element.className.replace(`btn-success`, `btn-outline-success`);
     }
 }
 
@@ -559,6 +532,11 @@ async function catcherRun(forcedId) {
             else if (status === 429) {
                 watcher.pre = watcher.pre > 0 ? watcher.pre + 1 : 1;
             }
+            else if (status === 422) {
+                watcher.pre = watcher.pre > 0 ? watcher.pre + 1 : 1;
+                watcherNotQualified(watcher)
+
+            }
 
             watcherUpdate(watcher);
             catcher.timeout = setTimeout(catcherRun, delay(), status === 429 ? id : undefined);
@@ -580,7 +558,7 @@ function catcherPauseOn(reason) {
     paused.reason = reason;
 
     const element = document.getElementById(`pause`);
-    element.className = element.className.replace(`btn-default`, `btn-danger`);
+    element.className = element.className.replace(`btn-secondary`, `btn-danger`);
 }
 
 function catcherPauseOff(reason) {
@@ -591,7 +569,7 @@ function catcherPauseOff(reason) {
         paused.reason = null;
 
         const element = document.getElementById(`pause`);
-        element.className = element.className.replace(`btn-danger`, `btn-default`);
+        element.className = element.className.replace(`btn-danger`, `btn-secondary`);
 
         bootbox.hideAll();
         catcherRun();
@@ -606,10 +584,10 @@ function catcherPauseToggle() {
     paused.status = !paused.status;
 
     if (paused.status) {
-        element.className = className.replace(`btn-default`, `btn-danger`);
+        element.className = className.replace(`btn-secondary`, `btn-danger`);
     }
     else {
-        element.className = className.replace(`btn-danger`, `btn-default`);
+        element.className = className.replace(`btn-danger`, `btn-secondary`);
 
         catcherRun();
     }
@@ -682,6 +660,7 @@ async function textToSpeech(phrase) {
 
 document.getElementById(`pause`).addEventListener(`click`, catcherPauseToggle);
 document.getElementById(`add-watcher`).addEventListener(`click`, addWatcher);
+document.getElementById(`add-group`).addEventListener(`click`, addGroup);
 
 document.addEventListener(`click`, (event) => {
     const element = event.target;
