@@ -198,7 +198,7 @@ function groupAdd(group) {
 function addWatchertoGroup(watcher,groupid) {
     if(watcher instanceof Object) {
         var group = storage.watcherGroups[groupid] instanceof Object ? storage.watcherGroups[groupid] : storage.watcherGroups[`default`]
-        group.members = group.members.push(watcher.id)
+        group.members.push(watcher.id)
     }
     saveWatcherGroups();
 }
