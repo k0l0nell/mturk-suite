@@ -72,17 +72,17 @@
                 <div class="modal-body row">
                     <!-- NickName-->
                     <div class="col-sm-6">
-                        <div class="input-group input-group form-group">
-                            <div class="input-group-prepend">
+                        <div class="input-group input-group-sm form-group-sm">
+                            <div class="input-group-prepend input-group-prepend">
                                 <span class="input-group-text">Nickname</span>
                             </div>
-                            <input id="watcher-settings-nickname" type="text" class="form-control" placeholder="">
+                            <input id="watcher-settings-nickname" type="text" class="form-control form-control" placeholder="">
                         </div>
                     </div>
 
                     <!-- Once -->
                     <div class="col-sm-6">
-                        <div class="input-group form-group">
+                        <div class="input-group input-group-sm form-group">
                             <div class="input-group-prepend">
                                 <div class="input-group-text">
                                     <input id="watcher-settings-once" name="watcher-settings-once" type="checkbox" autocomplete="off">
@@ -91,6 +91,20 @@
                             <div class="input-group-append">
                                 <span class="input-group-text">Once</span>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12">
+                        <div class="input-group input-group-sm form-group">
+                            <div class="input-group-prepend">
+                                    <span class="input-group-text">Group </span>
+                            </div>
+                            <select id="watcher-group" name="watcher-group" class="custom-select">
+                                <option value="default"selected>Default</option>
+                                <option value="1">One</option>
+                                <option value="2">Two</option>
+                                <option value="3">Three</option>
+                            </select>
                         </div>
                     </div>
 
@@ -201,10 +215,10 @@
 <div id="{{watcherid}}" class="col-sm-4 col-md-3 col-lg-2 w-20">
             <div class="card watcher border-warning w-20">
                 <div class="card-header">
-                    <span class="text-bold pl-1 name">{{watcherid}}</span>
-                    <div class="float-right pt-2">
-                        <span id="{{watcherid}}settings" class="glyphicon glyphicon-cog text-muted align-top"></span>
-                        <span id="{{watcherid}}remove" class="glyphicon glyphicon-remove text-danger align-top"></span>
+                    <span class="text-bold name">{{watcherid}}</span>
+                    <div class="float-right">
+                        <span id="{{watcherid}}settings" class="glyphicon glyphicon-cog glyphicon-cog-sm text-muted align-center mb-1"></span>
+                        <span id="{{watcherid}}remove" class="glyphicon glyphicon-remove glyphicon-remove-sm text-danger align-center mb-1"></span>
                     </div>
                 </div>
                 <div class="card-body">
@@ -219,8 +233,14 @@
         </div>
 </script>
 <script id="group_template" type="x-tmpl-mustache">
-    <div id="watchersgroup-{{id}}" class="col-sm-12  no-border border-primary mb-1">
-            >> {{name}} <<
+    <div id="watchersgroup-{{id}}" class="card mb-1 w-100">
+        <div class="card-header">
+            &gt;&gt; {{name}} &lt;&lt;
+            <div class="float-right">
+                <span id="{{id}}pause" class="glyphicon glyphicon-pause text-muted align-center"></span>
+                <span id="{{id}}remove" class="glyphicon glyphicon-remove text-danger align-center"></span>
+            </div>
+        </div>
     </div>
 </script>
 

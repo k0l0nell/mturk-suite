@@ -37,17 +37,26 @@
   padding-top: 2px;
 }
 
-.glyphicon-cog {
+.glyphicon-cog-sm {
+position:relative;
   cursor: pointer;
   font-size: 10px;
-  padding-top: 2px;
+}
+
+.glyphicon-remove-sm {
+position:relative;
+  cursor: pointer;
+  font-size: 10px;
 }
 
 .glyphicon-remove {
+  position:relative;
   cursor: pointer;
-  font-size: 10px;
-  padding-top: 2px;
- /* padding-right: 2px;*/
+}
+
+.glyphicon-pause {
+  position:relative;
+  cursor: pointer;
 }
 
 
