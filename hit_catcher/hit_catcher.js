@@ -295,7 +295,7 @@ function addWatcher(groupid) {
                 const watcher = {
                     id: result.match(/projects\/([A-Z0-9]+)\/tasks/) ? result.match(/projects\/([A-Z0-9]+)\/tasks/)[1] : result.match(/([A-Z0-9]+)/) ? result.match(/([A-Z0-9]+)/)[1] : result,
                     name: ``,
-                    once: true,
+                    once: false,
                     sound: true
                 };
 
@@ -603,6 +603,7 @@ async function catcherRun(forcedId) {
                 watcher.pre = watcher.pre > 0 ? watcher.pre + 1 : 1;
             }
             else if (status === 422) {
+                // TODO Check if actually unqualified... don't pause if not
                 watcher.pre = watcher.pre > 0 ? watcher.pre + 1 : 1;
                 watcherNotQualified(watcher)
 
