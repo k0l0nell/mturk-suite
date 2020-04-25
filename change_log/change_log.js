@@ -6,7 +6,7 @@ changeLog.push({
   'HIT Catcher': [
     'Added Support for grouping HITS and pausing groups ',
   ],
-  'HIT Tracker': ['Added more measures','re-organised tables and moved to tabs ']
+  'HIT Tracker': ['Added more measures','Re-organised tables and moved to tabs ']
 })
 
 changeLog.push({
