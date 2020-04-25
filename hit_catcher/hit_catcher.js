@@ -272,7 +272,16 @@ function saveAll() {
 function saveOrder() {
     //TODO
     //"#watchers"
-    storage.order = [...document.getElementById(`watchers`).children].map((element) => element.id);
+    var order_watchers = []
+    var order_groups = []
+
+    $("#watchersgroups > div.watchergroup > div.watchergroupbody > div.awatcher").each((index,item) => order_watchers.push(item.id))
+    $("#watchersgroups > div.watchergroup").each((index,item) => order_groups.push(item.id.replace('watchersgroup-','')))
+
+    Object.values(storage.watchers).forEach((watcher) => watcher.order = order_watchers.indexOf(watcher.id))
+    Object.values(storage.watcherGroups).forEach((group) => group.order = order_groups.indexOf(group.id))
+
+    //storage.order = order_watchers;
 
     chrome.storage.local.set({
         order: storage.order
@@ -379,7 +388,8 @@ function watcherDraw(watcher) {
         watchersearched: 0,
         watcherpre: 0,
         soundon: (watcher.sound === true) ? 'btn-success' : 'btn-outline-success',
-        catchon: (catcher.ids.includes(watcher.id)) ? 'btn-warning' : 'btn-outline-warning'
+        catchon: (catcher.ids.includes(watcher.id)) ? 'btn-warning' : 'btn-outline-warning',
+        catchtext: (catcher.ids.includes(watcher.id)) ? 'Catching' : 'Catch'
     };
 
     var watcher_template = document.getElementById("watcher_template").innerHTML;
@@ -495,15 +505,42 @@ function watcherCatchToggle(watcher) {
 
     if (ids.includes(id) === false) {
         element.className = className.replace(`btn-outline-warning`, `btn-warning`);
+        $(`#${id}catch`).text("Catching")
 
         ids.push(id);
         catcherRun(id);
     }
     else {
         element.className = className.replace(`btn-warning`, `btn-outline-warning`);
+        $(`#${id}catch`).text("Catch")
 
         ids.splice(ids.indexOf(id), 1);
     }
+}
+
+function watcherCatchOff(watcher) {
+    const id = watcher.id;
+    const element = $(`#${id}catch`)
+
+     element.removeClass(`btn-warning`)
+     element.addClass(`btn-outline-warning`);
+     element.text("Catch")
+
+     catcher.ids.splice(catcher.ids.indexOf(id), 1);
+
+}
+
+function watcherCatchOn(watcher) {
+    const id = watcher.id;
+    const element = $(`#${id}catch`)
+
+    element.removeClass(`btn-outline-warning`)
+    element.addClass(`btn-warning`);
+    element.text("Catching")
+
+    catcher.ids.push(id);
+    catcherRun(id);
+
 }
 
 
@@ -723,22 +760,29 @@ function catcherPauseOff(reason) {
 }
 
 function watcherGroupPauseToggle(group) {
-    group.members.forEach((watcherid) => {
-        watcherCatchToggle(storage.watchers[watcherid])
-    });
 
     var pausebtn = $(`#${group.id}pause`)
 
-    if(pausebtn.attr("class").indexOf("glyphicon-pause") > -1)
+    if(pausebtn.attr("class").indexOf("glyphicon-stop") > -1)
     {
-            pausebtn.removeClass("glyphicon-pause")
+            pausebtn.removeClass("glyphicon-stop")
             pausebtn.addClass("glyphicon-play")
+
+            group.members.forEach((watcherid) => {
+                    watcherCatchOff(storage.watchers[watcherid])
+            });
     }
     else
     {
             pausebtn.removeClass("glyphicon-play")
-            pausebtn.addClass("glyphicon-pause")
+            pausebtn.addClass("glyphicon-stop")
+
+            group.members.forEach((watcherid) => {
+                    watcherCatchOn(storage.watchers[watcherid])
+            });
     }
+
+    saveAll()
 
 }
 

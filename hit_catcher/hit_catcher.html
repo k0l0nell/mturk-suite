@@ -206,7 +206,7 @@
 
 <!-- Template for Watcher-->
 <script id="watcher_template" type="x-tmpl-mustache">
-<div id="{{watcherid}}" class="col-sm-4 col-md-3 col-lg-2 w-20">
+<div id="{{watcherid}}" class="awatcher col-sm-4 col-md-3 col-lg-2 w-20">
             <div class="card watcher border-warning w-20">
                 <div class="card-header">
                     <span class="text-bold name">{{watcherid}}</span>
@@ -220,20 +220,20 @@
                     <span class="adv-stats"></span>
                 </div>
                 <div class="card-footer p-0 pb-1 pl-1">
-                    <button name="{{watcherid}}" id="{{watcherid}}catch" class="catch btn btn-xxs {{catchon}} mr-1">Catch</button>
+                    <button name="{{watcherid}}" id="{{watcherid}}catch" class="catch btn btn-xxs {{catchon}} mr-1">{{catchtext}}</button>
                     <button name="{{watcherid}}" id="{{watcherid}}sound" class="sound btn btn-xxs {{soundon}}">Sound</button>
                 </div>
             </div>
         </div>
 </script>
 <script id="group_template" type="x-tmpl-mustache">
-    <div id="watchersgroup-{{id}}" class="card mb-1 w-100">
+    <div id="watchersgroup-{{id}}" name="{{id}}" class="watchergroup card mb-1 w-100">
         <h6 class="card-header">
             <span class="glyphicon glyphicon-chevron-right text-muted align-center"></span>
             {{name}}
             <div class="float-right">
                 <span id="{{id}}plus" class="glyphicon glyphicon-plus text-success align-center"></span>
-                <span id="{{id}}pause" class="glyphicon glyphicon-pause text-muted align-center"></span>
+                <span id="{{id}}pause" class="glyphicon glyphicon-stop text-muted align-center"></span>
                 <span id="{{id}}remove" class="glyphicon glyphicon-remove text-danger align-center"></span>
             </div>
         </h6>
