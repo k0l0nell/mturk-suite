@@ -226,7 +226,7 @@ function groupAddDraw(group) {
 
 function removeGroup(group) {
     bootbox.confirm({
-            message: `Are you sure you want to delete the group \'${group.name}\'?`,
+            message: `Removing group \'${group.name}\' means you will lose any watchers stored within! Are you sure?`,
             buttons: {
                 confirm: {
                     className: 'btn-sm btn-success'
@@ -688,6 +688,7 @@ function catcherPauseOn(reason) {
 
     const element = document.getElementById(`pause`);
     element.className = element.className.replace(`btn-secondary`, `btn-danger`);
+    $('#pause').text("Paused")
 }
 
 function catcherPauseOff(reason) {
@@ -699,6 +700,7 @@ function catcherPauseOff(reason) {
 
         const element = document.getElementById(`pause`);
         element.className = element.className.replace(`btn-danger`, `btn-secondary`);
+        $('#pause').text("Pause")
 
         bootbox.hideAll();
         catcherRun();
@@ -714,10 +716,11 @@ function catcherPauseToggle() {
 
     if (paused.status) {
         element.className = className.replace(`btn-secondary`, `btn-danger`);
+        $('#pause').text("Paused")
     }
     else {
         element.className = className.replace(`btn-danger`, `btn-secondary`);
-
+        $('#pause').text("Pause")
         catcherRun();
     }
 }
