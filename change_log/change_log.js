@@ -1,6 +1,15 @@
 const changeLog = [];
 
 changeLog.push({
+  version: '2.7.01',
+  date: 'from bdesmeijter',
+  'HIT Catcher': [
+    'Added Support for grouping HITS and pausing groups ',
+  ],
+  'HIT Tracker': ['Added more measures','re-organised tables and moved to tabs ']
+})
+
+changeLog.push({
   version: 'Announcement',
   date: 'from Kadauchi',
   'Turkerview': [
