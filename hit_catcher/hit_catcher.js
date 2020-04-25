@@ -135,15 +135,14 @@ const storage = new Object();
     ((object) => {
         storage.watchers = object instanceof Object ? object : new Object();
 
-        for (const group of Object.values(storage.watcherGroups)) {
-            for(const watcherid of group.members) {
+        Object.values(storage.watcherGroups).sort(sortWatcherGroups).forEach( (group) => {
+            group.members.sort(sortWatchers).forEach((watcherid) => {
                 const watcher = storage.watchers[watcherid];
-                    if (watcher instanceof Object) {
-                        watcherDraw(watcher);
-                    }
-            }
-
-        }
+                if (watcher instanceof Object) {
+                    watcherDraw(watcher);
+                }
+            });
+        });
 
         chrome.storage.local.set({
             watchers: storage.watchers
@@ -154,6 +153,15 @@ const storage = new Object();
 function sortWatcherGroups(groupa, groupb) {
     if( groupa instanceof Object && groupb instanceof Object) {
         return groupa.order - groupb.order
+    }
+    else {
+        return 0
+        }
+}
+
+function sortWatchers(watchera, watcherb) {
+    if( storage.watchers[watchera] instanceof Object && storage.watchers[watcherb] instanceof Object) {
+        return storage.watchers[watchera].order - storage.watchers[watcherb].order
     }
     else {
         return 0
@@ -218,6 +226,12 @@ function groupAddDraw(group) {
         removeGroup(group)
      });
 
+     $(`#${group.id}pause`).click((event) => {
+             watcherGroupPauseToggle(group)
+      });
+
+
+
      var groupBody = $( `#watchersgroup-${group.id} div.watchergroupbody` )
      groupBody.sortable();
      groupBody.disableSelection();
@@ -267,7 +281,7 @@ function saveOrder() {
 
 function saveWatchers() {
     const filtered = new Object();
-    const properties = [`id`, `name`, `group`,`once`, `sound`, `project`];
+    const properties = [`id`, `name`, `group`, `order`, `once`, `sound`, `project`];
 
     for (const key in storage.watchers) {
         const watcher = storage.watchers[key];
@@ -323,6 +337,7 @@ function addWatchers(groupid) {
                 const watcher = {
                     id: result.match(/projects\/([A-Z0-9]+)\/tasks/) ? result.match(/projects\/([A-Z0-9]+)\/tasks/)[1] : result.match(/([A-Z0-9]+)/) ? result.match(/([A-Z0-9]+)/)[1] : result,
                     group: groupid,
+                    order: $(`#watchersgroup-${groupid} div.watchergroupbody`).children().length,
                     name: ``,
                     once: false,
                     sound: true
@@ -364,7 +379,7 @@ function watcherDraw(watcher) {
         watchersearched: 0,
         watcherpre: 0,
         soundon: (watcher.sound === true) ? 'btn-success' : 'btn-outline-success',
-        catchon: (catcher.ids.includes(watcher.id)) ? 'btn-danger' : 'btn-outline-danger'
+        catchon: (catcher.ids.includes(watcher.id)) ? 'btn-warning' : 'btn-outline-warning'
     };
 
     var watcher_template = document.getElementById("watcher_template").innerHTML;
@@ -479,13 +494,13 @@ function watcherCatchToggle(watcher) {
     const className = element.className;
 
     if (ids.includes(id) === false) {
-        element.className = className.replace(`btn-outline-danger`, `btn-danger`);
+        element.className = className.replace(`btn-outline-warning`, `btn-warning`);
 
         ids.push(id);
         catcherRun(id);
     }
     else {
-        element.className = className.replace(`btn-danger`, `btn-outline-danger`);
+        element.className = className.replace(`btn-warning`, `btn-outline-warning`);
 
         ids.splice(ids.indexOf(id), 1);
     }
@@ -660,12 +675,12 @@ async function catcherRun(forcedId) {
             else if (status === 429) {
                 watcher.pre = watcher.pre > 0 ? watcher.pre + 1 : 1;
             }
-            else if (status === 422) {
+            //else if (status === 422) {
                 // TODO Check if actually unqualified... don't pause if not
-                watcher.pre = watcher.pre > 0 ? watcher.pre + 1 : 1;
-                watcherNotQualified(watcher)
+                //watcher.pre = watcher.pre > 0 ? watcher.pre + 1 : 1;
+            //    watcherNotQualified(watcher)
 
-            }
+            //}
 
             watcherUpdate(watcher);
             catcher.timeout = setTimeout(catcherRun, delay(), status === 429 ? id : undefined);
@@ -705,6 +720,26 @@ function catcherPauseOff(reason) {
         bootbox.hideAll();
         catcherRun();
     }
+}
+
+function watcherGroupPauseToggle(group) {
+    group.members.forEach((watcherid) => {
+        watcherCatchToggle(storage.watchers[watcherid])
+    });
+
+    var pausebtn = $(`#${group.id}pause`)
+
+    if(pausebtn.attr("class").indexOf("glyphicon-pause") > -1)
+    {
+            pausebtn.removeClass("glyphicon-pause")
+            pausebtn.addClass("glyphicon-play")
+    }
+    else
+    {
+            pausebtn.removeClass("glyphicon-play")
+            pausebtn.addClass("glyphicon-pause")
+    }
+
 }
 
 function catcherPauseToggle() {
