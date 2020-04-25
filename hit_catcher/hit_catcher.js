@@ -135,12 +135,14 @@ const storage = new Object();
     ((object) => {
         storage.watchers = object instanceof Object ? object : new Object();
 
-        for (const key of storage.order) {
-            const watcher = storage.watchers[key];
-
-            if (watcher instanceof Object) {
-                watcherDraw(watcher);
+        for (const group of Object.values(storage.watcherGroups)) {
+            for(const watcherid of group.members) {
+                const watcher = storage.watchers[watcherid];
+                    if (watcher instanceof Object) {
+                        watcherDraw(watcher);
+                    }
             }
+
         }
 
         chrome.storage.local.set({
@@ -243,10 +245,8 @@ function removeGroup(group) {
                 }
             }
         });
-
-
-
 }
+
 
 function saveAll() {
     saveOrder();
@@ -256,6 +256,7 @@ function saveAll() {
 }
 
 function saveOrder() {
+    //TODO
     //"#watchers"
     storage.order = [...document.getElementById(`watchers`).children].map((element) => element.id);
 
@@ -266,7 +267,7 @@ function saveOrder() {
 
 function saveWatchers() {
     const filtered = new Object();
-    const properties = [`id`, `name`, `once`, `sound`, `project`];
+    const properties = [`id`, `name`, `group`,`once`, `sound`, `project`];
 
     for (const key in storage.watchers) {
         const watcher = storage.watchers[key];
@@ -410,6 +411,9 @@ function watcherRemove(watcher) {
                     delete storage.watchers[id];
                 }
 
+                var old_group = storage.watcherGroups[watcher.group];
+                old_group.members.splice(old_group.members.indexOf(watcher.id),1)
+
                 if (catcher.ids.includes(id)) {
                     catcher.ids.splice(catcher.ids.indexOf(id), 1);
                 }
@@ -507,6 +511,15 @@ function watcherSettingsShow(watcher) {
 
     const project = watcher.project;
 
+    //update available groups
+    groupSelection = $("#watcher-settings-watcher-group")
+    groupSelection.empty()
+    Object.values(storage.watcherGroups).forEach((group) => {
+        groupSelection.append(`<option value="${group.id}">${group.name}</option>`)
+    });
+
+    groupSelection.val(watcher.group).prop('selected', true);
+
     if (project instanceof Object) {
         document.getElementById(`watcher-settings-requester-name`).textContent = project.requester_name;
         document.getElementById(`watcher-settings-requester-id`).textContent = project.requester_id;
@@ -526,11 +539,25 @@ function watcherSettingsShow(watcher) {
         document.getElementById(`watcher-settings-requirements`).textContent = ``;
     }
 
+
+
+
     $(`#watcher-settings-modal`).modal(`show`);
 
     $(`#watcher-settings-modal`).on(`hidden.bs.modal`, (event) => {
         $(`#watcher-settings-modal`).off(`hidden.bs.modal`);
 
+        var new_group_id = groupSelection.children('option:selected').val()
+        if(watcher.group != new_group_id) {
+            var old_group = storage.watcherGroups[watcher.group];
+            old_group.members.splice(old_group.members.indexOf(watcher.id),1)
+
+            storage.watcherGroups[new_group_id].members.push(watcher.id)
+
+            $(`#watchersgroup-${new_group_id}`).append($(`#${watcher.id}`))
+        }
+
+        watcher.group = new_group_id
         watcher.name = document.getElementById(`watcher-settings-nickname`).value;
         watcher.once = document.getElementById(`watcher-settings-once`).checked;
         watcherUpdate(watcher);
