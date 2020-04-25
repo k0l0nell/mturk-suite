@@ -35,8 +35,6 @@ chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => 
 });
 
   $( function() {
-    $( "#watchers" ).sortable();
-    $( "#watchers" ).disableSelection();
 
     $("#watchersgroups").sortable();
     $("#watchersgroups" ).disableSelection();
@@ -195,9 +193,9 @@ function groupAdd(group) {
     }
 }
 
-function addWatchertoGroup(watcher,groupid) {
+function addWatchertoGroup(watcher) {
     if(watcher instanceof Object) {
-        var group = storage.watcherGroups[groupid] instanceof Object ? storage.watcherGroups[groupid] : storage.watcherGroups[`default`]
+        var group = storage.watcherGroups[watcher.group] instanceof Object ? storage.watcherGroups[watcher.group] : storage.watcherGroups[`default`]
         group.members.push(watcher.id)
     }
     saveWatcherGroups();
@@ -211,13 +209,42 @@ function groupAddDraw(group) {
     $('#watchersgroups').append(watchergroup_rendered)
 
     $(`#${group.id}plus`).click((event) => {
-        addWatcher(group.id)
+        addWatchers(group.id)
     });
 
     $(`#${group.id}remove`).click((event) => {
-            delete storage.watcherGroups[group.id];
-            saveWatcherGroups;
+        removeGroup(group)
+     });
+
+     var groupBody = $( `#watchersgroup-${group.id} div.watchergroupbody` )
+     groupBody.sortable();
+     groupBody.disableSelection();
+
+}
+
+function removeGroup(group) {
+    bootbox.confirm({
+            message: `Are you sure you want to delete the group \'${group.name}\'?`,
+            buttons: {
+                confirm: {
+                    className: 'btn-sm btn-success'
+                },
+                cancel: {
+                    className: 'btn-sm btn-danger'
+                }
+            },
+            animate: false,
+            callback (result) {
+                if (result) {
+                    $(`#watchersgroup-${group.id}`).remove()
+                    //TODO remove all watchers as well (or add to default?)
+                    delete storage.watcherGroups[group.id];
+                    saveAll();
+                }
+            }
         });
+
+
 
 }
 
@@ -276,10 +303,10 @@ function saveHitCatcher() {
 }
 
 function addWatcher() {
-    addWatcher('default');
+    addWatchers('default');
 }
 
-function addWatcher(groupid) {
+function addWatchers(groupid) {
     bootbox.prompt({
         title: `Add watcher by Groupd Id, Preview URL or Accept URL`,
         buttons: {
@@ -294,12 +321,12 @@ function addWatcher(groupid) {
             if (result) {
                 const watcher = {
                     id: result.match(/projects\/([A-Z0-9]+)\/tasks/) ? result.match(/projects\/([A-Z0-9]+)\/tasks/)[1] : result.match(/([A-Z0-9]+)/) ? result.match(/([A-Z0-9]+)/)[1] : result,
+                    group: groupid,
                     name: ``,
                     once: false,
                     sound: true
                 };
 
-                addWatchertoGroup(watcher,groupid);
                 watcherAdd(watcher);
             }
         }
@@ -307,10 +334,14 @@ function addWatcher(groupid) {
 }
 
 function watcherAdd(watcher) {
+
     const id = watcher.id;
     const watchers = storage.watchers;
 
     if (watchers[id] === undefined) {
+
+        addWatchertoGroup(watcher);
+
         watchers[id] = watcher;
 
         saveOrder();
@@ -338,7 +369,7 @@ function watcherDraw(watcher) {
     var watcher_template = document.getElementById("watcher_template").innerHTML;
     var watcher_rendered = Mustache.render(watcher_template,watcher_data)
 
-    $('#watchers').append(watcher_rendered)
+    $(`#watchersgroup-${watcher.group} div.watchergroupbody`).append(watcher_rendered)
 
     $(`#${watcher.id}settings`).click( (event) => {
         watcherSettingsShow(watcher);
