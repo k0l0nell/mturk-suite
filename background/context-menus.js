@@ -96,6 +96,8 @@ chrome.contextMenus.create({
       chrome.runtime.sendMessage({
         hitCatcher: {
           id: hitSetId,
+          group: `default`,
+          order: 99,
           name: ``,
           once: true,
           sound: true
@@ -118,6 +120,8 @@ chrome.contextMenus.create({
         hitCatcher: {
           id: hitSetId,
           name: ``,
+          group: `default`,
+          order: 99,
           once: false,
           sound: false
         }

@@ -383,7 +383,8 @@ function watcherDraw(watcher) {
     }
 
     var watcher_data = {
-        watcherid: watcher.name.length > 0 ? watcher.name : watcher.project instanceof Object && typeof watcher.project.requester_name === `string` ? watcher.project.requester_name : watcher.id,
+        watchername: watcher.name.length > 0 ? watcher.name : watcher.project instanceof Object && typeof watcher.project.requester_name === `string` ? watcher.project.requester_name : watcher.id,
+        watcherid: watcher.id,
         watchercaught: 0,
         watchersearched: 0,
         watcherpre: 0,
