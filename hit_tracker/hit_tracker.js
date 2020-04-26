@@ -49,6 +49,19 @@ function todaysOverviewData () {
         const reward = hit.reward.amount_in_dollars
         const requesterId = hit.requester_id
 
+        if (! Object.keys(reqs).includes(requesterId)) {
+                    reqs[requesterId] = {
+                      id: requesterId,
+                      name: hit.requester_name,
+                      count: 0,
+                      rejected: 0,
+                      pending: 0,
+                      approved: 0,
+                      paid: 0,
+                      value: 0
+                    }
+         }
+
         if (state.match(/Submitted|Pending|Approved|Paid/)) {
           hits.submitted.count ++
           hits.submitted.value += reward
@@ -65,45 +78,19 @@ function todaysOverviewData () {
           var isApproved = (state.match(/Approved/)) ? 1 : 0
           var isPaid = (state.match(/Paid/)) ? 1 : 0
 
-          if (!reqs[requesterId]) {
 
-            reqs[requesterId] = {
-              id: requesterId,
-              name: hit.requester_name,
-              count: 1,
-              rejected: 0,
-              pending: isPending,
-              approved: isApproved,
-              paid: isPaid,
-              value: reward
-            }
-          } else {
-            reqs[requesterId].count++
-            if(isPending) {reqs[requesterId].pending++}
-            if(isApproved) {reqs[requesterId].approved++}
-            if(isPaid) {reqs[requesterId].paid++}
-            reqs[requesterId].value += reward
-          }
+          reqs[requesterId].count++
+          if(isPending) {reqs[requesterId].pending++}
+          if(isApproved) {reqs[requesterId].approved++}
+          if(isPaid) {reqs[requesterId].paid++}
+          reqs[requesterId].value += reward
+
         } else if (state.match(/Returned/)) {
           hits.returned.count ++
           hits.returned.value += reward
         } else if (state.match(/Rejected/)) {
             hits.rejected.count++
-
-            if(! Object.keys(reqs).includes(requesterId)) {
-                reqs[requesterId] = {
-                              id: requesterId,
-                              name: hit.requester_name,
-                              count: 0,
-                              rejected: 1,
-                              pending: 0,
-                              approved: 0,
-                              paid: 0,
-                              value: 0
-                 }
-            }
-            else {reqs[requesterId].rejected++ }
-
+            reqs[requesterId].rejected++
             reqs[requesterId].count++
             hits.rejected.value += reward
         }
