@@ -257,7 +257,10 @@ function removeGroup(group) {
             callback (result) {
                 if (result) {
                     $(`#watchersgroup-${group.id}`).remove()
-                    //TODO remove all watchers as well (or add to default?)
+
+                    //remove watchers contained
+                    group.members.forEach((member)=> removeWatcher(storage.watchers[member],true))
+
                     delete storage.watcherGroups[group.id];
                     saveAll();
                 }
@@ -434,7 +437,13 @@ function watcherRemove(watcher) {
         },
         animate: false,
         callback (result) {
-            if (result) {
+            removeWatcher(watcher,result);
+        }
+    });
+}
+
+function removeWatcher(watcher,result) {
+    if (result && watcher instanceof Object) {
                 const id = watcher.id;
 
                 if (storage.watchers[id]) {
@@ -453,9 +462,7 @@ function watcherRemove(watcher) {
                 }
 
                 saveWatchers();
-            }
-        }
-    });
+    }
 }
 
 function watcherCaught(watcher) {
@@ -611,7 +618,7 @@ function watcherSettingsShow(watcher) {
 
             storage.watcherGroups[new_group_id].members.push(watcher.id)
 
-            $(`#watchersgroup-${new_group_id}`).append($(`#${watcher.id}`))
+            $(`#${watcher.id}`).detach().appendTo(`#watchersgroup-${new_group_id} div.watchergroupbody`)
         }
 
         watcher.group = new_group_id
