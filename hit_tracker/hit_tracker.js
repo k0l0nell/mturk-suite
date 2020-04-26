@@ -90,7 +90,7 @@ function todaysOverviewData () {
         } else if (state.match(/Rejected/)) {
             hits.rejected.count++
 
-            if(! reqs[requesterId] instanceof Object) {
+            if(! Object.keys(reqs).includes(requesterId)) {
                 reqs[requesterId] = {
                               id: requesterId,
                               name: hit.requester_name,
