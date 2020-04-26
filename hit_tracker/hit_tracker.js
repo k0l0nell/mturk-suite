@@ -89,7 +89,7 @@ function todaysOverviewData () {
           hits.returned.value += reward
         } else if (state.match(/Rejected/)) {
             hits.rejected.count++
-            reqs[requesterId].rejected++
+            if(reqs[requesterId].rejected) { reqs[requesterId].rejected++ } else {reqs[requesterId].rejected = 1}
             reqs[requesterId].count++
             hits.rejected.value += reward
         }
