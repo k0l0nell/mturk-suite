@@ -232,6 +232,10 @@ function groupAddDraw(group) {
 
     $('#watchersgroups').append(watchergroup_rendered)
 
+    $(`#${group.id}rename`).click((event) => {
+        renameGroup(group)
+    });
+
     $(`#${group.id}plus`).click((event) => {
         addWatchers(group.id)
     });
@@ -260,6 +264,28 @@ function groupAddDraw(group) {
         $(`#${group.id}hide`).addClass("glyphicon-chevron-down")
      }
 
+}
+
+function renameGroup(group) {
+    bootbox.prompt({
+            title: `Rename Group`,
+            buttons: {
+                confirm: {
+                    className: `btn-sm btn-success`
+                },
+                cancel: {
+                    className: `btn-sm btn-danger`
+                }
+            },
+            callback (result) {
+                if (result && group instanceof Object) {
+                    group.name = result;
+                    $(`#${group.id}name`).text(result)
+                    saveWatcherGroups()
+                 }
+
+                }
+        });
 }
 
 function removeGroup(group) {
