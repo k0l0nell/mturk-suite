@@ -75,7 +75,7 @@ const storage = new Object();
     //reload groups from storage
     ((object) => {
 
-        const defaultGroup = { id: `default`, name: `Default`, members: [] , order: 0};
+        const defaultGroup = { id: `default`, name: `Default`, members: [] , order: 0, stopped: false , shown: true};
 
         storage.watcherGroups = object instanceof Object ? object : new Object();
 
@@ -216,7 +216,11 @@ function addWatchertoGroup(watcher) {
 
 function groupAddDraw(group) {
     var watchergroup_template = document.getElementById("group_template").innerHTML;
-    var watchergroup_rendered = Mustache.render(watchergroup_template,group)
+
+    let group_ui = {...group};
+    group_ui.status = group.stopped ? "play" : "stop"
+
+    var watchergroup_rendered = Mustache.render(watchergroup_template,group_ui)
 
     $('#watchersgroups').append(watchergroup_rendered)
 
@@ -232,13 +236,21 @@ function groupAddDraw(group) {
              watcherGroupPauseToggle(group)
       });
 
-
+     $(`#${group.id}hide`).click((event) => {
+             watcherGroupHide(group)
+      });
 
      var groupBody = $( `#watchersgroup-${group.id} div.watchergroupbody` )
      groupBody.sortable({
                       stop: saveAll
                   });
      groupBody.disableSelection();
+
+     if(!group.shown) {
+        $(`#${group.id}body`).toggle( "blind" );
+        $(`#${group.id}hide`).removeClass("glyphicon-chevron-right")
+        $(`#${group.id}hide`).addClass("glyphicon-chevron-down")
+     }
 
 }
 
@@ -771,6 +783,24 @@ function catcherPauseOff(reason) {
     }
 }
 
+function watcherGroupHide(group) {
+    var control_arrow = $(`#${group.id}hide`)
+
+    if(control_arrow.attr("class").indexOf("glyphicon-chevron-right") > -1) {
+        control_arrow.removeClass("glyphicon-chevron-right")
+        control_arrow.addClass("glyphicon-chevron-down")
+        group.shown = false
+    }
+    else {
+        control_arrow.removeClass("glyphicon-chevron-down")
+        control_arrow.addClass("glyphicon-chevron-right")
+        group.shown = true
+    }
+
+    $(`#${group.id}body`).toggle( "blind" );
+    saveWatcherGroups();
+}
+
 function watcherGroupPauseToggle(group) {
 
     var pausebtn = $(`#${group.id}pause`)
@@ -783,6 +813,7 @@ function watcherGroupPauseToggle(group) {
             group.members.forEach((watcherid) => {
                     watcherCatchOff(storage.watchers[watcherid])
             });
+            group.stopped = true;
     }
     else
     {
@@ -792,6 +823,7 @@ function watcherGroupPauseToggle(group) {
             group.members.forEach((watcherid) => {
                     watcherCatchOn(storage.watchers[watcherid])
             });
+            group.stopped = false;
     }
 
     saveAll()

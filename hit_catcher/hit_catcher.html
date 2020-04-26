@@ -229,15 +229,15 @@
 <script id="group_template" type="x-tmpl-mustache">
     <div id="watchersgroup-{{id}}" name="{{id}}" class="watchergroup card mb-1 w-100">
         <h6 class="card-header">
-            <span class="glyphicon glyphicon-chevron-right text-muted align-center"></span>
+            <span id="{{id}}hide" class="glyphicon glyphicon-chevron-right text-muted align-center"></span>
             {{name}}
             <div class="float-right">
                 <span id="{{id}}plus" class="glyphicon glyphicon-plus text-success align-center"></span>
-                <span id="{{id}}pause" class="glyphicon glyphicon-stop text-muted align-center"></span>
+                <span id="{{id}}pause" class="glyphicon glyphicon-{{status}} text-muted align-center"></span>
                 <span id="{{id}}remove" class="glyphicon glyphicon-remove text-danger align-center"></span>
             </div>
         </h6>
-        <div class="watchergroupbody card-body row p-2"></div>
+        <div id="{{id}}body" class="watchergroupbody card-body row p-2"></div>
     </div>
 </script>
 
