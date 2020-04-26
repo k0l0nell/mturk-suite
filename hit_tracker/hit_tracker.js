@@ -89,7 +89,21 @@ function todaysOverviewData () {
           hits.returned.value += reward
         } else if (state.match(/Rejected/)) {
             hits.rejected.count++
-            if(reqs[requesterId].rejected) { reqs[requesterId].rejected++ } else {reqs[requesterId].rejected = 1}
+
+            if(! reqs[requesterId] instanceof Object) {
+                reqs[requesterId] = {
+                              id: requesterId,
+                              name: hit.requester_name,
+                              count: 0,
+                              rejected: 1,
+                              pending: 0,
+                              approved: 0,
+                              paid: 0,
+                              value: 0
+                 }
+            }
+            else {reqs[requesterId].rejected++ }
+
             reqs[requesterId].count++
             hits.rejected.value += reward
         }
