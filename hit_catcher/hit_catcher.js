@@ -86,8 +86,6 @@ const storage = new Object();
             groupAddDraw(group)
         })
 
-        //todo: Draw members of said groups
-
         chrome.storage.local.set({
                 watcherGroups: storage.watcherGroups
         });
@@ -96,6 +94,8 @@ const storage = new Object();
     ((object) => {
         storage.hitCatcher = {
             speed: 1500,
+            paused: false,
+            catching: [],
             captcha: {
                 popup: false,
                 hit_set_id: null
@@ -115,17 +115,24 @@ const storage = new Object();
                     storage.hitCatcher.captcha.hit_set_id = object.captcha.hit_set_id;
                 }
             }
+
+            storage.hitCatcher.catching = (object.catching instanceof Array) ? object.catching : []
+            storage.hitCatcher.paused = object.paused ? true : false
         }
+
 
         document.getElementById(`speed`).value = storage.hitCatcher.speed;
         document.getElementById(`captcha-popup`).checked = storage.hitCatcher.captcha.popup;
         document.getElementById(`captcha-hitSetId`).value = storage.hitCatcher.captcha.hit_set_id;
+
+        if(storage.hitCatcher.paused) {catcherPauseOn('Restored State from Save')} else{ catcherPauseOff('Restored State from Save') }
 
         chrome.storage.local.set({
             hitCatcher: storage.hitCatcher
         });
     })(items.hitCatcher);
 
+    // order is no longer saved /restored here. Part of watchers and Groups now
     ((array) => {
         storage.order = array instanceof Array ? array : new Array();
 
@@ -142,6 +149,7 @@ const storage = new Object();
                 const watcher = storage.watchers[watcherid];
                 if (watcher instanceof Object) {
                     watcherDraw(watcher);
+                    if( storage.hitCatcher.catching.includes(watcher.id)) { watcherCatchOn(watcher)}
                 }
             });
         });
@@ -290,8 +298,6 @@ function saveAll() {
 }
 
 function saveOrder() {
-    //TODO
-    //"#watchers"
     var order_watchers = []
     var order_groups = []
 
@@ -340,6 +346,8 @@ function saveHitCatcher() {
     storage.hitCatcher.speed = Number(document.getElementById(`speed`).value);
     storage.hitCatcher.captcha.popup = document.getElementById(`captcha-popup`).checked;
     storage.hitCatcher.captcha.hit_set_id = document.getElementById(`captcha-hitSetId`).value;
+    storage.hitCatcher.paused = catcher.paused.status
+    //storage.hitCatcher.ids = (storage.hitCatcher.catching instanceof Array) ? storage.hitCatcher.catching : []
 
     chrome.storage.local.set({
         hitCatcher: storage.hitCatcher
@@ -409,8 +417,8 @@ function watcherDraw(watcher) {
         watchersearched: 0,
         watcherpre: 0,
         soundon: (watcher.sound === true) ? 'btn-success' : 'btn-outline-success',
-        catchon: (catcher.ids.includes(watcher.id)) ? 'btn-warning' : 'btn-outline-warning',
-        catchtext: (catcher.ids.includes(watcher.id)) ? 'Catching' : 'Catch'
+        catchon: (storage.hitCatcher.catching.includes(watcher.id)) ? 'btn-warning' : 'btn-outline-warning',
+        catchtext: (storage.hitCatcher.catching.includes(watcher.id)) ? 'Catching' : 'Catch'
     };
 
     var watcher_template = document.getElementById("watcher_template").innerHTML;
@@ -465,8 +473,8 @@ function removeWatcher(watcher,result) {
                 var old_group = storage.watcherGroups[watcher.group];
                 old_group.members.splice(old_group.members.indexOf(watcher.id),1)
 
-                if (catcher.ids.includes(id)) {
-                    catcher.ids.splice(catcher.ids.indexOf(id), 1);
+                if (storage.hitCatcher.catching.includes(id)) {
+                    storage.hitCatcher.catching.splice(storage.hitCatcher.catching.indexOf(id), 1);
                 }
 
                 if (document.getElementById(id)) {
@@ -523,7 +531,7 @@ function watcherUpdate(watcher) {
 
 function watcherCatchToggle(watcher) {
     const id = watcher.id;
-    const ids = catcher.ids;
+    const ids = storage.hitCatcher.catching;
     const element = document.getElementById(id).getElementsByClassName(`catch`)[0];
     const className = element.className;
 
@@ -550,7 +558,7 @@ function watcherCatchOff(watcher) {
      element.addClass(`btn-outline-warning`);
      element.text("Catch")
 
-     catcher.ids.splice(catcher.ids.indexOf(id), 1);
+     storage.hitCatcher.catching.splice(storage.hitCatcher.catching.indexOf(id), 1);
 
 }
 
@@ -562,7 +570,7 @@ function watcherCatchOn(watcher) {
     element.addClass(`btn-warning`);
     element.text("Catching")
 
-    catcher.ids.push(id);
+    if(! storage.hitCatcher.catching.includes(id)) { storage.hitCatcher.catching.push(id) };
     catcherRun(id);
 
 }
@@ -686,9 +694,20 @@ async function catcherRun(forcedId) {
 
     clearTimeout(catcher.timeout);
 
-    if (catcher.paused.status === false && catcher.ids.length > 0) {
-        const id = typeof forcedId === `string` && catcher.ids.includes(forcedId) === true ? forcedId : catcher.ids[catcher.index = catcher.index >= catcher.ids.length -1 ? 0 : catcher.index + 1];
+    if (catcher.paused.status === false && storage.hitCatcher.catching.length > 0) {
+        const id = typeof forcedId === `string` && storage.hitCatcher.catching.includes(forcedId) === true ? forcedId : storage.hitCatcher.catching[catcher.index = catcher.index >= storage.hitCatcher.catching.length -1 ? 0 : catcher.index + 1];
         const watcher = storage.watchers[id];
+
+        var display_name = watcher.name.length > 0 ? watcher.name : watcher.project instanceof Object && typeof watcher.project.requester_name === `string` ? watcher.project.requester_name : watcher.id;
+
+        console.log(`Attempting a catch for ${display_name}`)
+
+        /* TESTING */
+        //watcher.searched = watcher.searched > 0 ? watcher.searched + 1 : 1;
+        //watcherUpdate(watcher);
+        //catcher.timeout = setTimeout(catcherRun, delay(), undefined);
+        return ;
+        /* TESTING END*/
 
         var err;
         const response = await fetch(`https://worker.mturk.com/projects/${id}/tasks/accept_random?format=json`, {
@@ -696,7 +715,8 @@ async function catcherRun(forcedId) {
         })
         .catch(e => err = e);
         
-        console.log(response.url)
+
+
         if (response.url && response.url.includes('https://www.amazon.com/ap/signin')) {
             return catcherLoggedOut();
         } else if (response.status == 200 || response.status == 429 || response.status == 422) {
@@ -745,7 +765,8 @@ async function catcherRun(forcedId) {
 
             watcherUpdate(watcher);
             catcher.timeout = setTimeout(catcherRun, delay(), status === 429 ? id : undefined);
-        } else if (err instanceof TypeError) {
+        }
+        else if (err instanceof TypeError) {
           catcher.timeout = setTimeout(catcherRun, delay(), id);
         } else {
           catcher.timeout = setTimeout(catcherRun, delay(), id);
@@ -759,24 +780,26 @@ async function catcherRun(forcedId) {
 function catcherPauseOn(reason) {
     const paused = catcher.paused.status;
 
-    paused.status = true;
-    paused.reason = reason;
+    catcher.paused.status = true;
+    catcher.paused.reason = reason;
 
-    const element = document.getElementById(`pause`);
-    element.className = element.className.replace(`btn-secondary`, `btn-danger`);
-    $('#pause').text("Paused")
+    const element = $('#pause');
+    element.removeClass("btn-secondary")
+    element.addClass("btn-danger")
+    element.text("Paused")
 }
 
 function catcherPauseOff(reason) {
     const paused = catcher.paused.status;
 
     if (reason === undefined || reason === paused.reason) {
-        paused.status = false;
-        paused.reason = null;
+        catcher.paused.status = false;
+        catcher.paused.reason = null;
 
-        const element = document.getElementById(`pause`);
-        element.className = element.className.replace(`btn-danger`, `btn-secondary`);
-        $('#pause').text("Pause")
+        const element = $('#pause');
+        element.removeClass("btn-danger")
+        element.addClass("btn-secondary")
+        element.text("Pause")
 
         bootbox.hideAll();
         catcherRun();
@@ -831,19 +854,22 @@ function watcherGroupPauseToggle(group) {
 }
 
 function catcherPauseToggle() {
+    console.log(`toggled pause on ${$(`#pause`).text()}`)
+
     const paused = catcher.paused;
-    const element = document.getElementById(`pause`);
-    const className = element.className;
+    const element = $(`#pause`)
 
     paused.status = !paused.status;
 
     if (paused.status) {
-        element.className = className.replace(`btn-secondary`, `btn-danger`);
-        $('#pause').text("Paused")
+        element.removeClass("btn-secondary")
+        element.addClass("btn-danger")
+        element.text("Paused")
     }
     else {
-        element.className = className.replace(`btn-danger`, `btn-secondary`);
-        $('#pause').text("Pause")
+        element.removeClass("btn-danger")
+        element.addClass("btn-secondary")
+        element.text("Pause")
         catcherRun();
     }
 }
@@ -975,8 +1001,8 @@ window.addEventListener(`keydown`, (event) => {
                         for (const id of ids) {
                             delete storage.watchers[id];
 
-                            if (catcher.ids.includes(id)) {
-                                catcher.ids.splice(catcher.ids.indexOf(id), 1);
+                            if (storage.hitCatcher.catching.includes(id)) {
+                                storage.hitCatcher.catching.splice(storage.hitCatcher.catching.indexOf(id), 1);
                             }
 
                             document.getElementById(id).parentNode.removeChild(document.getElementById(id));
