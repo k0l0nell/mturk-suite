@@ -36,7 +36,9 @@ chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => 
 
   $( function() {
 
-    $("#watchersgroups").sortable();
+    $("#watchersgroups").sortable({
+        stop: saveAll
+    });
     $("#watchersgroups" ).disableSelection();
   } );
 
@@ -233,7 +235,9 @@ function groupAddDraw(group) {
 
 
      var groupBody = $( `#watchersgroup-${group.id} div.watchergroupbody` )
-     groupBody.sortable();
+     groupBody.sortable({
+                      stop: saveAll
+                  });
      groupBody.disableSelection();
 
 }
@@ -263,6 +267,7 @@ function removeGroup(group) {
 
 
 function saveAll() {
+    console.log('Saving all Objects');
     saveOrder();
     saveWatchers();
     saveHitCatcher();
@@ -413,7 +418,6 @@ function watcherDraw(watcher) {
     $(`#${watcher.id}catch`).click( (event) => {
         watcherCatchToggle(watcher);
     });
-
 
 }
 
@@ -903,7 +907,7 @@ window.addEventListener(`keydown`, (event) => {
 
     if (key === `Enter`) {
         if (document.getElementsByClassName(`bootbox`)[0]) {
-            document.getElementsByClassName(`bootbox`)[0].querySelector(`[data-bb-handler="confirm"]`).click();
+            $(`.bootbox`).find($(`.bootbox-accept`)).trigger('click')
             bootbox.hideAll();
         }
     }
