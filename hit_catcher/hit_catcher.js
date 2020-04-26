@@ -706,7 +706,7 @@ async function catcherRun(forcedId) {
         //watcher.searched = watcher.searched > 0 ? watcher.searched + 1 : 1;
         //watcherUpdate(watcher);
         //catcher.timeout = setTimeout(catcherRun, delay(), undefined);
-        return ;
+        //return ;
         /* TESTING END*/
 
         var err;
