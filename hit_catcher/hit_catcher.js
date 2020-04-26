@@ -578,7 +578,7 @@ function watcherSettingsShow(watcher) {
     //update available groups
     groupSelection = $("#watcher-settings-watcher-group")
     groupSelection.empty()
-    Object.values(storage.watcherGroups).forEach((group) => {
+    Object.values(storage.watcherGroups).sort(sortWatcherGroups).forEach((group) => {
         groupSelection.append(`<option value="${group.id}">${group.name}</option>`)
     });
 
