@@ -49,6 +49,8 @@ function todaysOverviewData () {
         const reward = hit.reward.amount_in_dollars
         const requesterId = hit.requester_id
 
+
+
         if (! Object.keys(reqs).includes(requesterId)) {
                     reqs[requesterId] = {
                       id: requesterId,
@@ -74,10 +76,9 @@ function todaysOverviewData () {
             hits.pending.value += reward
           }
 
-          var isPending = (state.match(/Pending/)) ? 1 : 0
+          var isPending = (state.match(/Pending|Submitted/)) ? 1 : 0
           var isApproved = (state.match(/Approved/)) ? 1 : 0
           var isPaid = (state.match(/Paid/)) ? 1 : 0
-
 
           reqs[requesterId].count++
           if(isPending) {reqs[requesterId].pending++}
