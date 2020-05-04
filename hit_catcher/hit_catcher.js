@@ -724,10 +724,6 @@ async function catcherRun(forcedId) {
         const id = typeof forcedId === `string` && storage.hitCatcher.catching.includes(forcedId) === true ? forcedId : storage.hitCatcher.catching[catcher.index = catcher.index >= storage.hitCatcher.catching.length -1 ? 0 : catcher.index + 1];
         const watcher = storage.watchers[id];
 
-        var display_name = watcher.name.length > 0 ? watcher.name : watcher.project instanceof Object && typeof watcher.project.requester_name === `string` ? watcher.project.requester_name : watcher.id;
-
-        console.log(`Attempting a catch for ${display_name}`)
-
         /* TESTING */
         //watcher.searched = watcher.searched > 0 ? watcher.searched + 1 : 1;
         //watcherUpdate(watcher);
@@ -745,8 +741,13 @@ async function catcherRun(forcedId) {
 
         if (response.url && response.url.includes('https://www.amazon.com/ap/signin')) {
             return catcherLoggedOut();
-        } else if (response.status == 200 || response.status == 429 || response.status == 422) {
+        }
+        else if (response.status == 200 || response.status == 429 || response.status == 422) {
             watcher.searched = watcher.searched > 0 ? watcher.searched + 1 : 1;
+
+            var display_name = watcher.name.length > 0 ? watcher.name : watcher.project instanceof Object && typeof watcher.project.requester_name === `string` ? watcher.project.requester_name : watcher.id;
+            console.log(`Attempting a catch for ${display_name}`)
+
 
             const status = response.status;
 
