@@ -724,6 +724,10 @@ async function catcherRun(forcedId) {
         const id = typeof forcedId === `string` && storage.hitCatcher.catching.includes(forcedId) === true ? forcedId : storage.hitCatcher.catching[catcher.index = catcher.index >= storage.hitCatcher.catching.length -1 ? 0 : catcher.index + 1];
         const watcher = storage.watchers[id];
 
+        var display_name = watcher.name.length > 0 ? watcher.name : watcher.project instanceof Object && typeof watcher.project.requester_name === `string` ? watcher.project.requester_name : watcher.id;
+
+        console.log(`Attempting a catch for ${display_name}`)
+
         /* TESTING */
         //watcher.searched = watcher.searched > 0 ? watcher.searched + 1 : 1;
         //watcherUpdate(watcher);
@@ -736,14 +740,12 @@ async function catcherRun(forcedId) {
           credentials: `include`,
         })
         .catch(e => err = e);
+        
+
 
         if (response.url && response.url.includes('https://www.amazon.com/ap/signin')) {
             return catcherLoggedOut();
         } else if (response.status == 200 || response.status == 429 || response.status == 422) {
-
-           var display_name = watcher.name.length > 0 ? watcher.name : watcher.project instanceof Object && typeof watcher.project.requester_name === `string` ? watcher.project.requester_name : watcher.id;
-           console.log(`Attempted a catch for ${display_name}`)
-
             watcher.searched = watcher.searched > 0 ? watcher.searched + 1 : 1;
 
             const status = response.status;
@@ -788,8 +790,7 @@ async function catcherRun(forcedId) {
             //}
 
             watcherUpdate(watcher);
-            //catcher.timeout = setTimeout(catcherRun, delay(), status === 429 ? id : undefined);
-            catcher.timeout = setTimeout(catcherRun, delay(), id);
+            catcher.timeout = setTimeout(catcherRun, delay(), status === 429 ? id : undefined);
         }
         else if (err instanceof TypeError) {
           catcher.timeout = setTimeout(catcherRun, delay(), id);
