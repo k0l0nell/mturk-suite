@@ -154,6 +154,10 @@ const storage = new Object();
             });
         });
 
+        // remove catchers for watcher that no longer exist
+        storage.hitCatcher.catching.filter(id => Object.keys(storage.watchers).includes(id) === false).forEach(id => storage.hitCatcher.catching.splice(storage.hitCatcher.catching.indexOf(id),1))
+
+
         chrome.storage.local.set({
             watchers: storage.watchers
         });
@@ -369,6 +373,11 @@ function saveWatcherGroups() {
 
 
 function saveHitCatcher() {
+
+    // remove catchers for watcher that no longer exist
+    storage.hitCatcher.catching.filter(id => Object.keys(storage.watchers).includes(id) === false).forEach(id => storage.hitCatcher.catching.splice(storage.hitCatcher.catching.indexOf(id),1))
+
+
     storage.hitCatcher.speed = Number(document.getElementById(`speed`).value);
     storage.hitCatcher.captcha.popup = document.getElementById(`captcha-popup`).checked;
     storage.hitCatcher.captcha.hit_set_id = document.getElementById(`captcha-hitSetId`).value;
