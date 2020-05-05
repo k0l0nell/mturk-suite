@@ -721,8 +721,16 @@ async function catcherRun(forcedId) {
     clearTimeout(catcher.timeout);
 
     if (catcher.paused.status === false && storage.hitCatcher.catching.length > 0) {
-        const id = typeof forcedId === `string` && storage.hitCatcher.catching.includes(forcedId) === true ? forcedId : storage.hitCatcher.catching[catcher.index = catcher.index >= storage.hitCatcher.catching.length -1 ? 0 : catcher.index + 1];
+        var isWatcherCatching = storage.hitCatcher.catching.includes(forcedId)
+        var nextWatcherId = storage.hitCatcher.catching[catcher.index = catcher.index >= storage.hitCatcher.catching.length -1 ? 0 : catcher.index + 1]
+
+
+        const id = (typeof forcedId === `string` && isWatcherCatching) ? forcedId : nextWatcherId;
         const watcher = storage.watchers[id];
+
+        if(!watcher) {
+            console.log(`Unable to find watcher instance for ID: ${id}. Catcher called with forcedID: ${forcedId} was (${isWatcherCatching}) catching`)
+        }
 
         /* TESTING */
         //watcher.searched = watcher.searched > 0 ? watcher.searched + 1 : 1;
@@ -742,7 +750,7 @@ async function catcherRun(forcedId) {
         if (response.url && response.url.includes('https://www.amazon.com/ap/signin')) {
             return catcherLoggedOut();
         }
-        else if (response.status == 200 || response.status == 429 || response.status == 422) {
+        else if (watcher && (response.status == 200 || response.status == 429 || response.status == 422)) {
             watcher.searched = watcher.searched > 0 ? watcher.searched + 1 : 1;
 
             var display_name = watcher.name.length > 0 ? watcher.name : watcher.project instanceof Object && typeof watcher.project.requester_name === `string` ? watcher.project.requester_name : watcher.id;
