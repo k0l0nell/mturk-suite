@@ -6,12 +6,15 @@
     <title>MTurk Dashboards</title>
 
     <link href="/bootstrap/css/glyphicons.css" rel="stylesheet" media="screen">
+    <link href="/chartjs/Chart.min.css" rel="stylesheet" media="screen">
 
     <script src="/bootstrap-4.4/js/jquery.min.js"></script>
     <script src="/bootstrap-4.4/js/bootstrap.min.js"></script>
     <script src="/bootstrap-4.4/js/bootbox.all.min.js"></script>
     <script src="/bootstrap-4.4/js/jquery-ui.js"></script>
     <script src="/bootstrap-4.4/js/mustache.min.js"></script>
+
+    <script src="/chartjs/Chart.min.js"></script>
 
     <script src="/js/theme.js"></script>
 </head>
@@ -34,13 +37,11 @@
                 </ul>
             </div>
             <div class="card-body">
-                <h5 class="card-title">Special title treatment</h5>
-                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
+                <canvas class="w-50" id="productivity"></canvas>
             </div>
         </div>
     </div>
 
 </body>
-<script src="hit_catcher.js"></script>
+<script src="dashboards.js"></script>
 </html>

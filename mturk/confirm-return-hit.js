@@ -5,6 +5,8 @@ async function confirmReturnHIT() {
     if (event.target.querySelector(`[value="delete"]`)) {
       event.preventDefault();
 
+     console.log("it is here")
+
       // eslint-disable-next-line no-alert
       if (window.confirm(`Are you sure you want to return this HIT?`)) {
         event.target.submit();
