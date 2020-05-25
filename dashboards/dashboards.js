@@ -53,13 +53,16 @@ function reduceByRequester(previous, current) {
     if(Object.keys(previous).includes(current.requester_id)) {
         previous[current.requester_id].rewards.push(current.reward.amount_in_dollars)
         previous[current.requester_id].work_dates.push(current.date)
+
+        previous[current.requester_id].rejections += current.state.match(/Rejected/) ? 1 : 0
     }
     else {
         previous[current.requester_id] = {
                     'requester_id': `${current.requester_id}`,
                     'requester_name':`${current.requester_name}`,
                     'rewards' : [current.reward.amount_in_dollars],
-                    'work_dates' : [current.date]
+                    'work_dates' : [current.date],
+                    'rejections': current.state.match(/Rejected/) ? 1 : 0
                 }
     }
 
@@ -70,6 +73,15 @@ function sum(previous, current) {
     return previous + current
 }
 
+function hideZeroOrOne(data) {
+    var rejected=  rejectionRatio(data)
+    return ( rejected > 0 && rejected < 1 && data.rewards.length > 10 )
+}
+
+function rejectionRatio(data) {
+    return (data.rejections/data.rewards.length)
+}
+
 function avgRewards(data) {
     return (data.rewards.reduce(sum,0))/data.rewards.length
 }
@@ -78,28 +90,38 @@ function drawChart(data) {
     var data_labels = Object.keys(data).map((id,index) => data[id].requester_name)
     var data_values = Object.keys(data).map((id,index) => avgRewards(data[id]) )
 
-    var myChart = new Chart($('#productivity'), {
+    var top = 10
+
+    var topReward = Object.values(data).sort(function(a,b){ return b.rewards.reduce(sum) - a.rewards.reduce(sum)}).slice(0,top)
+    var bottomAvgReward = Object.values(data).sort(function(a,b){ return avgRewards(a) - avgRewards(b)}).slice(0,top)
+    var topavgReward = Object.values(data).sort(function(a,b){ return avgRewards(b) - avgRewards(a)}).slice(0,top)
+    var topHITS = Object.values(data).sort(function(a,b){ return b.rewards.length - a.rewards.length}).slice(0,top)
+
+    var toprejectionRatio = Object.values(data)
+        .sort(function(a,b){ return rejectionRatio(b) - rejectionRatio(a)})
+        .filter(req => hideZeroOrOne(req))
+        .slice(0,top)
+
+    new Chart($('#TopAvgReward'), {
       type: 'bar',
       data: {
-          labels: data_labels,
+          labels: topavgReward.map(req=>req.requester_name),
           datasets: [{
-              label: 'Avg. Reward',
-              data: data_values,
+              label: `Top ${top} By Avg. Reward`,
+              data: topavgReward.map(req=> avgRewards(req)),
               backgroundColor: [
                   'rgba(255, 99, 132, 0.2)',
                   'rgba(54, 162, 235, 0.2)',
                   'rgba(255, 206, 86, 0.2)',
                   'rgba(75, 192, 192, 0.2)',
-                  'rgba(153, 102, 255, 0.2)',
-                  'rgba(255, 159, 64, 0.2)'
+                  'rgba(153, 102, 255, 0.2)'
               ],
               borderColor: [
                   'rgba(255, 99, 132, 1)',
                   'rgba(54, 162, 235, 1)',
                   'rgba(255, 206, 86, 1)',
                   'rgba(75, 192, 192, 1)',
-                  'rgba(153, 102, 255, 1)',
-                  'rgba(255, 159, 64, 1)'
+                  'rgba(153, 102, 255, 1)'
               ],
               borderWidth: 1
           }]
@@ -108,11 +130,153 @@ function drawChart(data) {
           scales: {
               yAxes: [{
                   ticks: {
-                      beginAtZero: true
+                      beginAtZero: true,
+                      callback: function (value) {return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                   }
               }]
           }
       }
   });
+    new Chart($('#TopReward'), {
+        type: 'bar',
+        data: {
+            labels: topReward.map(req=>req.requester_name),
+            datasets: [{
+                label: `Top ${top} By Total Reward`,
+                data: topReward.map(req=> req.rewards.reduce(sum)),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        callback: function (value) {return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                    }
+                }]
+            }
+        }
+    });
+    new Chart($('#TopHIT'), {
+            type: 'bar',
+            data: {
+                labels: topHITS.map(req=>req.requester_name),
+                datasets: [{
+                    label: `Top ${top} By # Hits`,
+                    data: topHITS.map(req=> req.rewards.length),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+
+    new Chart($('#BottomAvgReward'), {
+          type: 'bar',
+          data: {
+              labels: bottomAvgReward.map(req=>req.requester_name),
+              datasets: [{
+                  label: `Bottom ${top} By Avg. Reward`,
+                  data: bottomAvgReward.map(req=> avgRewards(req)),
+                  backgroundColor: [
+                      'rgba(255, 99, 132, 0.2)',
+                      'rgba(54, 162, 235, 0.2)',
+                      'rgba(255, 206, 86, 0.2)',
+                      'rgba(75, 192, 192, 0.2)',
+                      'rgba(153, 102, 255, 0.2)'
+                  ],
+                  borderColor: [
+                      'rgba(255, 99, 132, 1)',
+                      'rgba(54, 162, 235, 1)',
+                      'rgba(255, 206, 86, 1)',
+                      'rgba(75, 192, 192, 1)',
+                      'rgba(153, 102, 255, 1)'
+                  ],
+                  borderWidth: 1
+              }]
+          },
+          options: {
+              scales: {
+                  yAxes: [{
+                      ticks: {
+                          beginAtZero: true,
+                          callback: function (value) {return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                      }
+                  }]
+              }
+          }
+      });
+    new Chart($('#TopRejection'), {
+               type: 'bar',
+               data: {
+                   labels: toprejectionRatio.map(req=>req.requester_name),
+                   datasets: [{
+                       label: `Top ${top} By Rejection Ratio`,
+                       data: toprejectionRatio.map(req=> rejectionRatio(req)),
+                       backgroundColor: [
+                           'rgba(255, 99, 132, 0.2)',
+                           'rgba(54, 162, 235, 0.2)',
+                           'rgba(255, 206, 86, 0.2)',
+                           'rgba(75, 192, 192, 0.2)',
+                           'rgba(153, 102, 255, 0.2)'
+                       ],
+                       borderColor: [
+                           'rgba(255, 99, 132, 1)',
+                           'rgba(54, 162, 235, 1)',
+                           'rgba(255, 206, 86, 1)',
+                           'rgba(75, 192, 192, 1)',
+                           'rgba(153, 102, 255, 1)'
+                       ],
+                       borderWidth: 1
+                   }]
+               },
+               options: {
+                   scales: {
+                       yAxes: [{
+                           ticks: {
+                               beginAtZero: true,
+                               callback: function (value) {return value.toLocaleString('en-GB', {style:'percent'})}
+                           }
+                       }]
+                   }
+               }
+           });
+
 }
 

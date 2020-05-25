@@ -22,26 +22,69 @@
 <body style="padding: 3px">
 
     <div class="row">
-        <div class="card text-center w-100">
-            <div class="card-header">
-                <ul class="nav nav-tabs card-header-tabs">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Active</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link disabled" href="#">Disabled</a>
-                    </li>
-                </ul>
+        <div class="col-md-4 py-1">
+            <div class="card">
+                <div class="card-body">
+                    <canvas id="TopAvgReward"></canvas>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">Last updated 3 mins ago</small>
+                </div>
             </div>
-            <div class="card-body">
-                <canvas class="w-50" id="productivity"></canvas>
+        </div>
+        <div class="col-md-4 py-1">
+            <div class="card">
+                <div class="card-body">
+                    <canvas id="TopReward"></canvas>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">Last updated 3 mins ago</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 py-1">
+            <div class="card">
+                <div class="card-body">
+                    <canvas id="TopHIT"></canvas>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">Last updated 3 mins ago</small>
+                </div>
             </div>
         </div>
     </div>
-
+    <div class="row">
+        <div class="col-md-4 py-1">
+            <div class="card">
+                <div class="card-body">
+                    <canvas id="BottomAvgReward"></canvas>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">Last updated 3 mins ago</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 py-1">
+            <div class="card">
+                <div class="card-body">
+                    <canvas id="TopRejection"></canvas>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">Last updated 3 mins ago</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 py-1">
+            <div class="card">
+                <div class="card-body">
+                    <canvas id="BottomHIT"></canvas>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">Last updated 3 mins ago</small>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 <script src="dashboards.js"></script>
 </html>
