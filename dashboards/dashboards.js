@@ -73,6 +73,10 @@ function sum(previous, current) {
     return previous + current
 }
 
+function minimumHitsRequired(data, requirement) {
+    return data.rewards.length >= requirement
+}
+
 function hideZeroOrOne(data) {
     var rejected=  rejectionRatio(data)
     return ( rejected > 0 && rejected < 1 && data.rewards.length > 10 )
@@ -87,17 +91,17 @@ function avgRewards(data) {
 }
 
 function drawChart(data) {
-    var data_labels = Object.keys(data).map((id,index) => data[id].requester_name)
-    var data_values = Object.keys(data).map((id,index) => avgRewards(data[id]) )
 
     var top = 10
 
-    var topReward = Object.values(data).sort(function(a,b){ return b.rewards.reduce(sum) - a.rewards.reduce(sum)}).slice(0,top)
-    var bottomAvgReward = Object.values(data).sort(function(a,b){ return avgRewards(a) - avgRewards(b)}).slice(0,top)
-    var topavgReward = Object.values(data).sort(function(a,b){ return avgRewards(b) - avgRewards(a)}).slice(0,top)
-    var topHITS = Object.values(data).sort(function(a,b){ return b.rewards.length - a.rewards.length}).slice(0,top)
+    var meetsRequirements = Object.values(data).filter(requester => minimumHitsRequired(requester,5))
 
-    var toprejectionRatio = Object.values(data)
+    var topReward = meetsRequirements.sort(function(a,b){ return b.rewards.reduce(sum) - a.rewards.reduce(sum)}).slice(0,top)
+    var bottomAvgReward = meetsRequirements.sort(function(a,b){ return avgRewards(a) - avgRewards(b)}).slice(0,top)
+    var topavgReward = meetsRequirements.sort(function(a,b){ return avgRewards(b) - avgRewards(a)}).slice(0,top)
+    var topHITS = meetsRequirements.sort(function(a,b){ return b.rewards.length - a.rewards.length}).slice(0,top)
+
+    var toprejectionRatio = meetsRequirements
         .sort(function(a,b){ return rejectionRatio(b) - rejectionRatio(a)})
         .filter(req => hideZeroOrOne(req))
         .slice(0,top)
